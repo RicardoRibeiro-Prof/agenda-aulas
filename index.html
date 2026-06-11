@@ -8,163 +8,262 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
-
   <style>
     :root {
-      --bg: #f4f6f8;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
+      --bg: #f5f7fb;
+      --card: rgba(255,255,255,.96);
+      --text: #14213d;
+      --muted: #64748b;
       --primary: #2563eb;
       --primary-dark: #1d4ed8;
-      --danger: #dc2626;
+      --primary-soft: #dbeafe;
       --success: #16a34a;
+      --success-soft: #dcfce7;
       --warning: #f59e0b;
-      --border: #e5e7eb;
+      --warning-soft: #fef3c7;
+      --danger: #dc2626;
+      --danger-soft: #fee2e2;
+      --border: #e2e8f0;
+      --shadow: 0 12px 32px rgba(15,23,42,.08);
+      --radius: 22px;
+    }
+
+    body.dark {
+      --bg: #0f172a;
+      --card: rgba(30,41,59,.96);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --primary-soft: #1e3a8a;
+      --border: #334155;
+      --shadow: 0 12px 32px rgba(0,0,0,.28);
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--bg);
+      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
       color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.13), transparent 25%),
+        linear-gradient(180deg, var(--bg), var(--bg));
+      min-height: 100vh;
     }
 
     header {
-      background: linear-gradient(135deg, #1d4ed8, #2563eb);
+      padding: 24px 16px 8px;
+    }
+
+    .header-shell {
+      width: min(1180px,100%);
+      margin: 0 auto;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb 60%, #3b82f6);
       color: white;
-      padding: 22px 16px;
-      text-align: center;
-      border-radius: 0 0 24px 24px;
+      padding: 24px 22px;
+      border-radius: 0 0 30px 30px;
+      box-shadow: 0 16px 32px rgba(29,78,216,.22);
+      position: relative;
+      overflow: hidden;
     }
 
-    header h1 {
+    .header-shell::after {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      right: -70px;
+      top: -110px;
+      background: rgba(255,255,255,.10);
+      border-radius: 999px;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.16);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .header-shell h1 {
       margin: 0;
-      font-size: 24px;
+      font-size: clamp(28px,4vw,36px);
+      position: relative;
+      z-index: 1;
     }
 
-    header p {
+    .header-shell p {
       margin: 8px 0 0;
-      font-size: 14px;
-      opacity: 0.95;
+      opacity: .95;
+      position: relative;
+      z-index: 1;
     }
 
     main {
-      width: min(960px, 100%);
+      width: min(1180px,100%);
       margin: 0 auto;
-      padding: 16px;
+      padding: 22px 16px 28px;
     }
 
-    .screen {
-      display: none;
+    .screen { display: none; }
+    .screen.active { display: block; animation: fadeIn .22s ease; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .screen.active {
-      display: block;
+    .welcome, .card, .home-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .welcome {
+      padding: 22px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.95), rgba(239,246,255,.92));
+    }
+
+    body.dark .welcome {
+      background: linear-gradient(135deg, rgba(30,41,59,.95), rgba(15,23,42,.95));
+    }
+
+    .welcome h2, .card h2 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      color: var(--text);
+    }
+
+    .welcome p {
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.5;
     }
 
     .home-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(4,1fr);
       gap: 14px;
-      margin-top: 16px;
+      margin: 16px 0;
     }
 
     .home-card {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+      padding: 18px;
       cursor: pointer;
-      transition: 0.2s;
+      transition: .18s;
+      position: relative;
+      overflow: hidden;
     }
 
     .home-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+      transform: translateY(-3px);
+      border-color: #93c5fd;
     }
 
     .home-icon {
-      font-size: 38px;
-      margin-bottom: 10px;
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: var(--primary-soft);
+      font-size: 26px;
+      margin-bottom: 12px;
     }
 
     .home-card h3 {
-      margin: 0 0 8px;
-      color: var(--primary-dark);
-      font-size: 18px;
+      margin: 0 0 6px;
+      font-size: 17px;
     }
 
     .home-card p {
       margin: 0;
       color: var(--muted);
-      font-size: 14px;
-      line-height: 1.4;
+      font-size: 13px;
+      line-height: 1.45;
     }
 
-    .welcome {
-      background: linear-gradient(135deg, #eff6ff, #ffffff);
-      border: 1px solid #bfdbfe;
-      border-radius: 22px;
-      padding: 22px;
-      text-align: center;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 14px;
+      margin: 16px 0;
     }
 
-    .welcome h2 {
-      margin: 0 0 8px;
-      font-size: 23px;
-      color: var(--primary-dark);
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: var(--shadow);
     }
 
-    .welcome p {
-      margin: 0;
+    .stat strong {
+      display: block;
+      font-size: 26px;
+      margin-bottom: 4px;
+    }
+
+    .stat span {
       color: var(--muted);
-      line-height: 1.5;
+      font-size: 13px;
+      font-weight: 700;
     }
 
     .card {
-      background: var(--card);
-      border-radius: 18px;
-      padding: 16px;
+      padding: 20px;
       margin-bottom: 16px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.07);
-      border: 1px solid var(--border);
-    }
-
-    h2 {
-      margin-top: 0;
-      font-size: 20px;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 14px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 14px;
     }
 
     label {
       display: block;
-      font-weight: bold;
-      margin-bottom: 6px;
-      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: var(--muted);
     }
 
     input, select, textarea {
       width: 100%;
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 11px;
+      border-radius: 14px;
+      padding: 13px 14px;
       font-size: 15px;
       background: white;
+      color: #14213d;
+      outline: none;
+    }
+
+    body.dark input, body.dark select, body.dark textarea {
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 4px rgba(37,99,235,.12);
     }
 
     textarea {
-      min-height: 85px;
+      min-height: 105px;
       resize: vertical;
     }
 
@@ -174,809 +273,879 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
-      margin-top: 14px;
+      margin-top: 16px;
     }
 
     button {
       border: 0;
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-weight: bold;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 800;
       cursor: pointer;
       font-size: 14px;
+      transition: .16s;
     }
 
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-dark); }
-    .btn-secondary { background: #e5e7eb; color: #111827; }
-    .btn-danger { background: var(--danger); color: white; }
-    .btn-success { background: var(--success); color: white; }
-    .btn-warning { background: var(--warning); color: #111827; }
+    button:hover { transform: translateY(-1px); }
+
+    .btn-primary { background: linear-gradient(135deg,var(--primary),var(--primary-dark)); color: white; }
+    .btn-secondary { background: white; color: #0f172a; border: 1px solid var(--border); }
+    .btn-danger { background: linear-gradient(135deg,#ef4444,var(--danger)); color: white; }
+    .btn-success { background: linear-gradient(135deg,#22c55e,var(--success)); color: white; }
+    .btn-warning { background: linear-gradient(135deg,#fbbf24,var(--warning)); color: #111827; }
+
+    body.dark .btn-secondary {
+      background: #1e293b;
+      color: #e5e7eb;
+    }
 
     .registro {
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px;
-      margin-top: 12px;
-      background: #fff;
+      border-radius: 20px;
+      padding: 18px;
+      margin-top: 14px;
+      background: var(--card);
+      box-shadow: 0 8px 20px rgba(15,23,42,.06);
     }
 
     .registro.ministrada {
       border-left: 8px solid var(--success);
-      background: #f0fdf4;
+      background: linear-gradient(135deg, rgba(240,253,244,.9), var(--card));
+    }
+
+    body.dark .registro.ministrada {
+      background: linear-gradient(135deg, rgba(22,101,52,.25), var(--card));
     }
 
     .registro h3 {
-      margin: 0 0 8px;
-      font-size: 17px;
-      color: var(--primary-dark);
+      margin: 0 0 10px;
+      font-size: 20px;
     }
 
     .registro p {
-      margin: 5px 0;
-      line-height: 1.4;
+      margin: 6px 0;
+      line-height: 1.55;
     }
 
     .meta {
+      display: inline-flex;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(148,163,184,.12);
       color: var(--muted);
-      font-size: 13px;
-      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .tag {
+      display: inline-block;
+      background: var(--primary-soft);
+      color: #1e40af;
+      border-radius: 999px;
+      padding: 6px 11px;
+      font-size: 12px;
+      font-weight: 800;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    body.dark .tag { color: #bfdbfe; }
+
+    .tag-success { background: var(--success-soft); color: #166534; }
+    .tag-warning { background: var(--warning-soft); color: #92400e; }
+    .tag-danger { background: var(--danger-soft); color: #991b1b; }
+
+    .status-box {
+      background: rgba(37,99,235,.08);
+      color: #1e3a8a;
+      border: 1px solid rgba(147,197,253,.65);
+      border-radius: 18px;
+      padding: 14px 16px;
+      line-height: 1.55;
+      margin-bottom: 14px;
+      font-size: 14px;
+    }
+
+    body.dark .status-box {
+      color: #bfdbfe;
+      background: rgba(37,99,235,.16);
     }
 
     .empty {
       text-align: center;
       color: var(--muted);
-      padding: 30px 10px;
+      padding: 34px 16px;
       border: 2px dashed var(--border);
-      border-radius: 16px;
-      background: #fafafa;
+      border-radius: 20px;
+      background: rgba(255,255,255,.45);
     }
 
-    .tag {
-      display: inline-block;
-      background: #dbeafe;
-      color: #1e40af;
-      border-radius: 999px;
-      padding: 4px 9px;
-      font-size: 12px;
-      font-weight: bold;
-      margin-right: 6px;
-      margin-bottom: 4px;
-    }
+    body.dark .empty { background: rgba(15,23,42,.25); }
 
-    .tag-success {
-      background: #dcfce7;
-      color: #166534;
-    }
+    .top-back { margin-bottom: 14px; }
 
-    .tag-warning {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .status-box {
-      background: #eff6ff;
-      color: #1e3a8a;
-      border: 1px solid #bfdbfe;
-      border-radius: 14px;
-      padding: 12px;
-      line-height: 1.5;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
       font-size: 14px;
-      margin-bottom: 14px;
     }
 
-    .top-back {
-      margin-bottom: 14px;
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      vertical-align: top;
+      text-align: left;
     }
 
-    .top-back button {
-      background: #e5e7eb;
-      color: #111827;
+    th {
+      background: rgba(37,99,235,.08);
+      color: var(--text);
     }
 
     footer {
       text-align: center;
       color: var(--muted);
       font-size: 12px;
-      padding: 24px 12px;
+      padding: 12px 12px 28px;
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      #printArea, #printArea * { visibility: visible; }
+      #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+      .actions, .top-back, header, footer { display: none !important; }
+    }
+
+    @media (max-width: 950px) {
+      .home-grid, .dashboard-grid { grid-template-columns: repeat(2,1fr); }
+      .grid-3 { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 700px) {
-      .grid, .home-grid { grid-template-columns: 1fr; }
-      header h1 { font-size: 22px; }
+      .grid, .home-grid, .dashboard-grid { grid-template-columns: 1fr; }
       .actions button { width: 100%; }
+      .header-shell { padding: 22px 18px; }
+      table { font-size: 12px; }
     }
   </style>
 </head>
-
 <body>
-  <header>
+<header>
+  <div class="header-shell">
+    <div class="header-badge">Painel do Professor</div>
     <h1>Agenda de Aulas</h1>
-    <p>Registre, pesquise e acompanhe as aulas ministradas por turma.</p>
-  </header>
+    <p>Controle de aulas, planejamento, relatórios e backup.</p>
+  </div>
+</header>
 
-  <main>
-    <section id="telaInicio" class="screen active">
-      <div class="welcome">
-        <h2>Bem-vindo à sua Agenda de Aulas</h2>
-        <p>Escolha uma opção abaixo para registrar aulas, pesquisar conteúdos, ver resultados ou fazer backup dos seus dados.</p>
-        <p id="dbStatus" style="margin-top:10px;font-size:13px;color:#1e40af;font-weight:bold;">Carregando banco de dados...</p>
-      </div>
+<main>
+  <section id="telaInicio" class="screen active">
+    <div class="welcome">
+      <h2>Dashboard</h2>
+      <p>Resumo geral dos registros de aula.</p>
+      <p id="dbStatus" style="margin-top:10px;font-size:13px;color:#1e40af;font-weight:bold;">Conectando banco...</p>
+    </div>
 
-      <div class="home-grid">
-        <div class="home-card" onclick="abrirTela('telaRegistro')">
-          <div class="home-icon">➕</div>
-          <h3>Novo registro</h3>
-          <p>Cadastre uma aula ministrada, atividade, pendências e observações.</p>
-        </div>
+    <div class="dashboard-grid">
+      <div class="stat"><strong id="dashHoje">0</strong><span>Aulas hoje</span></div>
+      <div class="stat"><strong id="dashPendentes">0</strong><span>Pendentes</span></div>
+      <div class="stat"><strong id="dashMes">0</strong><span>Registros no mês</span></div>
+      <div class="stat"><strong id="dashTotal">0</strong><span>Total</span></div>
+    </div>
 
-        <div class="home-card" onclick="abrirTela('telaPesquisa')">
-          <div class="home-icon">🔎</div>
-          <h3>Pesquisar aulas</h3>
-          <p>Busque registros por turma, disciplina, data ou assunto.</p>
-        </div>
+    <div class="home-grid">
+      <div class="home-card" onclick="abrirTela('telaRegistro')"><div class="home-icon">➕</div><h3>Registrar</h3><p>Cadastrar aula, conteúdo e observações.</p></div>
+      <div class="home-card" onclick="abrirTela('telaPesquisa')"><div class="home-icon">🔎</div><h3>Pesquisar</h3><p>Buscar aulas registradas.</p></div>
+      <div class="home-card" onclick="abrirTela('telaPlanejamento')"><div class="home-icon">🗓️</div><h3>Planejamento</h3><p>Cadastrar e vincular assuntos planejados.</p></div>
+      <div class="home-card" onclick="abrirTela('telaRelatorios')"><div class="home-icon">📊</div><h3>Relatórios</h3><p>Gerar relatório por período.</p></div>
+      <div class="home-card" onclick="abrirTela('telaResultados')"><div class="home-icon">📋</div><h3>Resultados</h3><p>Ver registros encontrados.</p></div>
+      <div class="home-card" onclick="registrarAulaHoje()"><div class="home-icon">⚡</div><h3>Aula de hoje</h3><p>Atalho para registrar a aula atual.</p></div>
+      <div class="home-card" onclick="alternarTema()"><div class="home-icon">🌙</div><h3>Tema</h3><p>Alternar modo claro/escuro.</p></div>
+      <div class="home-card" onclick="abrirTela('telaBackup')"><div class="home-icon">💾</div><h3>Backup</h3><p>Exportar, importar e recuperar dados.</p></div>
+    </div>
 
-        <div class="home-card" onclick="abrirTela('telaResultados')">
-          <div class="home-icon">📋</div>
-          <h3>Resultados</h3>
-          <p>Veja os registros encontrados após uma pesquisa.</p>
-        </div>
-
-        <div class="home-card" onclick="abrirTela('telaBackup')">
-          <div class="home-icon">💾</div>
-          <h3>Backup</h3>
-          <p>Exporte, importe ou recupere seus registros salvos.</p>
-        </div>
-      </div>
+    <section class="card">
+      <h2>Último registro</h2>
+      <div id="ultimoRegistro" class="empty">Nenhum registro encontrado.</div>
     </section>
+  </section>
 
-    <section id="telaRegistro" class="screen">
-      <div class="top-back">
-        <button type="button" onclick="abrirTela('telaInicio')">← Voltar ao início</button>
-      </div>
-      <section class="card">
-        <h2>Novo registro</h2>
-
-        <form id="formAgenda">
-          <input type="hidden" id="editId">
-
-          <div class="grid">
-            <div>
-              <label for="data">Data da aula</label>
-              <input type="date" id="data" required>
-            </div>
-
-            <div>
-              <label for="turma">Turma</label>
-              <select id="turma" required onchange="atualizarDisciplinasDaTurma()">
-                <option value="">Selecione a turma</option>
-                <option value="1 ano de desenvolvimento de sistemas">1 ano de desenvolvimento de sistemas</option>
-                <option value="1 ano de programação de jogos">1 ano de programação de jogos</option>
-              </select>
-            </div>
-
-            <div>
-              <label for="disciplina">Disciplina</label>
-              <select id="disciplina" required>
-                <option value="">Selecione primeiro a turma</option>
-              </select>
-            </div>
-
-            <div>
-              <label for="aula">Aula/tema</label>
-              <input type="text" id="aula" placeholder="Ex.: Normalização, Game Design, IoT..." required>
-            </div>
-
-            <div class="full">
-              <label for="conteudo">Conteúdo ministrado</label>
-              <textarea id="conteudo" placeholder="Descreva o que foi explicado em sala..." required></textarea>
-            </div>
-
-            <div class="full">
-              <label for="atividade">Atividade realizada</label>
-              <textarea id="atividade" placeholder="Ex.: Exercício no caderno, prática no laboratório, revisão, avaliação..."></textarea>
-            </div>
-
-            <div class="full">
-              <label for="pendencias">Pendências / próxima aula</label>
-              <textarea id="pendencias" placeholder="Ex.: Corrigir atividade, revisar assunto, aplicar continuação..."></textarea>
-            </div>
-
-            <div class="full">
-              <label for="observacoes">Observações</label>
-              <textarea id="observacoes" placeholder="Ex.: turma participou bem, dificuldade em determinado ponto..."></textarea>
-            </div>
-          </div>
-
-          <div class="actions">
-            <button class="btn-primary" type="submit">Salvar registro</button>
-            <button class="btn-secondary" type="button" onclick="limparFormulario()">Limpar</button>
-          </div>
-        </form>
-      </section>
-    </section>
-
-    <section id="telaPesquisa" class="screen">
-      <div class="top-back">
-        <button type="button" onclick="abrirTela('telaInicio')">← Voltar ao início</button>
-      </div>
-      <section class="card">
-        <h2>Pesquisar aulas</h2>
-
-        <div class="status-box">
-          Você pode pesquisar de duas formas: selecione <strong>somente a data</strong> para ver todas as aulas do dia, ou selecione <strong>turma + disciplina</strong> para uma busca específica. Os registros aparecem na aba <strong>Resultados</strong>.
-        </div>
-
+  <section id="telaRegistro" class="screen">
+    <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaInicio')">← Início</button></div>
+    <section class="card">
+      <h2>Registrar aula</h2>
+      <form id="formAgenda">
+        <input type="hidden" id="editId">
         <div class="grid">
-          <div class="full">
-            <label for="busca">Pesquisar por aula, conteúdo ou atividade</label>
-            <input type="search" id="busca" placeholder="Ex.: normalização, MDA, revisão...">
-          </div>
-
+          <div><label for="data">Data</label><input type="date" id="data" required></div>
+          <div><label for="aulaNumero">Aula nº</label><input type="text" id="aulaNumero" placeholder="Ex.: Aula 1"></div>
           <div>
-            <label for="filtroTurma">Turma</label>
-            <select id="filtroTurma" onchange="atualizarFiltroDisciplinasPorTurma()">
+            <label for="turma">Turma</label>
+            <select id="turma" required onchange="atualizarDisciplinasDaTurma(); carregarPlanosParaRegistro();">
               <option value="">Selecione a turma</option>
               <option value="1 ano de desenvolvimento de sistemas">1 ano de desenvolvimento de sistemas</option>
               <option value="1 ano de programação de jogos">1 ano de programação de jogos</option>
             </select>
           </div>
-
           <div>
-            <label for="filtroDisciplina">Disciplina</label>
-            <select id="filtroDisciplina">
+            <label for="disciplina">Disciplina</label>
+            <select id="disciplina" required onchange="carregarPlanosParaRegistro()">
               <option value="">Selecione primeiro a turma</option>
             </select>
           </div>
-
-          <div>
-            <label for="filtroData">Data</label>
-            <input type="date" id="filtroData">
+          <div class="full">
+            <label for="planoRegistro">Planejamento vinculado</label>
+            <select id="planoRegistro" onchange="aplicarPlanoNoRegistro()">
+              <option value="">Selecione turma e disciplina para listar planejamentos</option>
+            </select>
           </div>
+          <div class="full"><label for="aula">Aula/tema</label><input type="text" id="aula" placeholder="Ex.: Normalização" required></div>
+          <div class="full"><label for="conteudo">Conteúdo ministrado</label><textarea id="conteudo" placeholder="Conteúdo trabalhado na aula" required></textarea></div>
+          <div class="full"><label for="atividade">Atividade realizada</label><textarea id="atividade" placeholder="Atividade aplicada"></textarea></div>
+          <div class="full"><label for="pendencias">Pendências / próxima aula</label><textarea id="pendencias" placeholder="Pendências ou próxima aula"></textarea></div>
+          <div class="full"><label for="observacoes">Observações</label><textarea id="observacoes" placeholder="Observações gerais"></textarea></div>
         </div>
-
         <div class="actions">
-          <button class="btn-primary" type="button" onclick="buscarRegistros()">Buscar aulas</button>
-          <button class="btn-secondary" type="button" onclick="limparFiltrosPesquisa()">Limpar pesquisa</button>
+          <button class="btn-primary" type="submit">Salvar registro</button>
+          <button class="btn-secondary" type="button" onclick="limparFormulario()">Limpar</button>
         </div>
-      </section>
+      </form>
     </section>
+  </section>
 
-    <section id="telaResultados" class="screen">
-      <div class="top-back">
-        <button type="button" onclick="abrirTela('telaInicio')">← Voltar ao início</button>
-      </div>
-      <section class="card">
-        <h2>Resultados</h2>
-        <div id="resumoResultados" class="status-box">Faça uma pesquisa para visualizar os registros aqui.</div>
-        <div id="listaRegistros"></div>
-      </section>
-    </section>
-
-    <section id="telaBackup" class="screen">
-      <div class="top-back">
-        <button type="button" onclick="abrirTela('telaInicio')">← Voltar ao início</button>
-      </div>
-      <section class="card">
-        <h2>Backup e recuperação</h2>
-
-        <div class="status-box">
-          Use o backup para não perder os registros quando atualizar o app ou trocar de arquivo.
+  <section id="telaPesquisa" class="screen">
+    <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaInicio')">← Início</button></div>
+    <section class="card">
+      <h2>Pesquisar</h2>
+      <div class="status-box">Use a data para ver todas as aulas do dia ou selecione turma e disciplina para filtrar.</div>
+      <div class="grid">
+        <div class="full"><label for="busca">Assunto ou palavra-chave</label><input type="search" id="busca" placeholder="Digite um assunto ou palavra-chave"></div>
+        <div>
+          <label for="filtroTurma">Turma</label>
+          <select id="filtroTurma" onchange="atualizarFiltroDisciplinasPorTurma()">
+            <option value="">Todas / selecionar</option>
+            <option value="1 ano de desenvolvimento de sistemas">1 ano de desenvolvimento de sistemas</option>
+            <option value="1 ano de programação de jogos">1 ano de programação de jogos</option>
+          </select>
         </div>
+        <div><label for="filtroDisciplina">Disciplina</label><select id="filtroDisciplina"><option value="">Todas / selecione primeiro a turma</option></select></div>
+        <div><label for="filtroData">Data única</label><input type="date" id="filtroData"></div>
+        <div>
+          <label for="filtroPeriodo">Período rápido</label>
+          <select id="filtroPeriodo" onchange="aplicarPeriodoRapido('filtro')">
+            <option value="">Sem período rápido</option>
+            <option value="hoje">Hoje</option>
+            <option value="semana">Esta semana</option>
+            <option value="mes">Este mês</option>
+          </select>
+        </div>
+        <div><label for="filtroDe">De</label><input type="date" id="filtroDe"></div>
+        <div><label for="filtroAte">Até</label><input type="date" id="filtroAte"></div>
+      </div>
+      <div class="actions">
+        <button class="btn-primary" type="button" onclick="buscarRegistros()">Buscar aulas</button>
+        <button class="btn-secondary" type="button" onclick="limparFiltrosPesquisa()">Limpar pesquisa</button>
+      </div>
+    </section>
+  </section>
 
+  <section id="telaResultados" class="screen">
+    <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaInicio')">← Início</button></div>
+    <section class="card">
+      <h2>Resultados</h2>
+      <div id="resumoResultados" class="status-box">Nenhuma pesquisa realizada.</div>
+      <div id="listaRegistros"></div>
+    </section>
+  </section>
+
+  <section id="telaPlanejamento" class="screen">
+    <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaInicio')">← Início</button></div>
+    <section class="card">
+      <h2>Planejamento</h2>
+      <form id="formPlano">
+        <input type="hidden" id="planoId">
+        <div class="grid-3">
+          <div><label>Bimestre</label><select id="planoBimestre"><option>1º Bimestre</option><option>2º Bimestre</option><option>3º Bimestre</option><option>4º Bimestre</option></select></div>
+          <div><label>Semana</label><input type="number" id="planoSemana" min="1" placeholder="Ex.: 1"></div>
+          <div><label>Aula nº</label><input id="planoAulaNumero" placeholder="Ex.: Aula 1"></div>
+        </div>
+        <div class="grid">
+          <div><label>Turma</label><select id="planoTurma" onchange="atualizarDisciplinasPlano()"><option value="">Selecione</option><option value="1 ano de desenvolvimento de sistemas">1 ano de desenvolvimento de sistemas</option><option value="1 ano de programação de jogos">1 ano de programação de jogos</option></select></div>
+          <div><label>Disciplina</label><select id="planoDisciplina"><option value="">Selecione primeiro a turma</option></select></div>
+          <div class="full"><label>Assunto</label><input id="planoAssunto" placeholder="Ex.: Framework MDA"></div>
+          <div class="full"><label>Conteúdo previsto</label><textarea id="planoConteudo" placeholder="Conteúdo previsto para a aula"></textarea></div>
+          <div class="full"><label>Atividade prevista</label><textarea id="planoAtividade" placeholder="Atividade planejada"></textarea></div>
+          <div class="full"><label>Pendência padrão</label><textarea id="planoPendencias" placeholder="Continuação, revisão ou próxima etapa"></textarea></div>
+        </div>
         <div class="actions">
-          <button class="btn-success" type="button" onclick="procurarDadosAntigos()">Procurar dados antigos</button>
-          <button class="btn-secondary" type="button" onclick="exportarTXT()">Exportar TXT</button>
-          <button class="btn-secondary" type="button" onclick="exportarBackupJSON()">Exportar backup JSON</button>
-          <button class="btn-secondary" type="button" onclick="document.getElementById('arquivoBackupJSON').click()">Importar backup JSON</button>
-          <button class="btn-danger" type="button" onclick="apagarTudo()">Apagar tudo</button>
-          <input type="file" id="arquivoBackupJSON" accept=".json" style="display:none" onchange="importarBackupJSON(event)">
+          <button class="btn-primary" type="submit">Salvar planejamento</button>
+          <button class="btn-secondary" type="button" onclick="limparPlano()">Limpar</button>
         </div>
-      </section>
+      </form>
     </section>
-  </main>
+    <section class="card">
+      <h2>Buscar planejamento</h2>
+      <div class="grid">
+        <div><label>Turma</label><select id="buscaPlanoTurma" onchange="atualizarDisciplinasBuscaPlano()"><option value="">Todas</option><option value="1 ano de desenvolvimento de sistemas">1 ano de desenvolvimento de sistemas</option><option value="1 ano de programação de jogos">1 ano de programação de jogos</option></select></div>
+        <div><label>Disciplina</label><select id="buscaPlanoDisciplina"><option value="">Todas</option></select></div>
+        <div><label>Assunto</label><input id="buscaPlanoTexto" placeholder="Pesquisar planejamento"></div>
+      </div>
+      <div class="actions"><button class="btn-primary" onclick="buscarPlanos()">Buscar planejamento</button></div>
+      <div id="listaPlanos"></div>
+    </section>
+  </section>
 
-  <footer>
-    Os registros ficam salvos no navegador deste aparelho usando armazenamento local.
-  </footer>
+  <section id="telaRelatorios" class="screen">
+    <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaInicio')">← Início</button></div>
+    <section class="card">
+      <h2>Relatórios</h2>
+      <div class="grid">
+        <div><label>Turma</label><select id="relTurma" onchange="atualizarDisciplinasRelatorio()"><option value="">Todas</option><option value="1 ano de desenvolvimento de sistemas">1 ano de desenvolvimento de sistemas</option><option value="1 ano de programação de jogos">1 ano de programação de jogos</option></select></div>
+        <div><label>Disciplina</label><select id="relDisciplina"><option value="">Todas</option></select></div>
+        <div><label>Status</label><select id="relStatus"><option value="">Todas</option><option>Pendente</option><option>Ministrada</option></select></div>
+        <div><label>Período rápido</label><select id="relPeriodo" onchange="aplicarPeriodoRapido('rel')"><option value="">Personalizado</option><option value="hoje">Hoje</option><option value="semana">Esta semana</option><option value="mes">Este mês</option></select></div>
+        <div><label>De</label><input type="date" id="relDe"></div>
+        <div><label>Até</label><input type="date" id="relAte"></div>
+      </div>
+      <div class="actions">
+        <button class="btn-primary" onclick="gerarRelatorio()">Gerar relatório</button>
+        <button class="btn-success" onclick="exportarRelatorioPDF()">Exportar PDF</button>
+      </div>
+    </section>
+    <section class="card" id="printArea">
+      <h2>Relatório</h2>
+      <div id="relResumo" class="status-box">Nenhum relatório gerado.</div>
+      <div id="relConteudo"></div>
+    </section>
+  </section>
 
-  <script>
-    const DB_NAME = "AgendaAulasDB";
-    const DB_VERSION = 1;
-    const STORE_REGISTROS = "registros";
-    const LEGACY_STORAGE_KEY = "agenda_aulas_professor_v2";
+  <section id="telaBackup" class="screen">
+    <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaInicio')">← Início</button></div>
+    <section class="card">
+      <h2>Backup</h2>
+      <div class="status-box">Gerencie seus backups.</div>
+      <div class="actions">
+        <button class="btn-success" onclick="procurarDadosAntigos()">Procurar dados antigos</button>
+        <button class="btn-secondary" onclick="exportarTXT()">Exportar TXT</button>
+        <button class="btn-secondary" onclick="exportarBackupJSON()">Exportar backup JSON</button>
+        <button class="btn-secondary" onclick="document.getElementById('arquivoBackupJSON').click()">Importar backup JSON</button>
+        <button class="btn-danger" onclick="apagarTudo()">Apagar tudo</button>
+        <input type="file" id="arquivoBackupJSON" accept=".json" style="display:none" onchange="importarBackupJSON(event)">
+      </div>
+    </section>
+  </section>
+</main>
 
-    const disciplinasPorTurma = {
-      "1 ano de programação de jogos": [
-        "Arte Digital",
-        "Game Design",
-        "Lógica de Programação e Motores 2D",
-        "Arquitetura de Sistemas"
-      ],
-      "1 ano de desenvolvimento de sistemas": [
-        "Arquitetura de Computadores e Redes",
-        "Modelagem de Banco de Dados",
-        "Métodos Ágeis de Desenvolvimento"
-      ]
+<footer>Dados salvos no banco interno do navegador.</footer>
+
+<script>
+const DB_NAME = "AgendaAulasDB";
+const DB_VERSION = 2;
+const STORE_REGISTROS = "registros";
+const STORE_PLANOS = "planejamentos";
+const LEGACY_STORAGE_KEY = "agenda_aulas_professor_v2";
+
+const disciplinasPorTurma = {
+  "1 ano de programação de jogos": ["Arte Digital","Game Design","Lógica de Programação e Motores 2D","Arquitetura de Sistemas"],
+  "1 ano de desenvolvimento de sistemas": ["Arquitetura de Computadores e Redes","Modelagem de Banco de Dados","Métodos Ágeis de Desenvolvimento"]
+};
+
+let db = null;
+let ultimaBusca = [];
+let ultimoRelatorio = [];
+
+const $ = id => document.getElementById(id);
+
+$("data").valueAsDate = new Date();
+
+function abrirTela(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  $(id).classList.add("active");
+  if(id==="telaInicio") atualizarDashboard();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function abrirBanco(){
+  return new Promise((resolve,reject)=>{
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = e => {
+      const database = e.target.result;
+      if(!database.objectStoreNames.contains(STORE_REGISTROS)){
+        const store = database.createObjectStore(STORE_REGISTROS,{keyPath:"id"});
+        store.createIndex("data","data",{unique:false});
+        store.createIndex("turma","turma",{unique:false});
+        store.createIndex("disciplina","disciplina",{unique:false});
+        store.createIndex("status","status",{unique:false});
+      }
+      if(!database.objectStoreNames.contains(STORE_PLANOS)){
+        const store = database.createObjectStore(STORE_PLANOS,{keyPath:"id"});
+        store.createIndex("turma","turma",{unique:false});
+        store.createIndex("disciplina","disciplina",{unique:false});
+      }
     };
+    request.onsuccess = e => { db = e.target.result; resolve(db); };
+    request.onerror = () => reject("Erro ao abrir banco");
+  });
+}
 
-    const form = document.getElementById("formAgenda");
-    const lista = document.getElementById("listaRegistros");
-    const busca = document.getElementById("busca");
-    const filtroTurma = document.getElementById("filtroTurma");
-    const filtroDisciplina = document.getElementById("filtroDisciplina");
-    const filtroData = document.getElementById("filtroData");
-    const turmaSelect = document.getElementById("turma");
-    const disciplinaSelect = document.getElementById("disciplina");
-    const resumoResultados = document.getElementById("resumoResultados");
-    const dbStatus = document.getElementById("dbStatus");
+function store(name,mode="readonly"){ return db.transaction(name,mode).objectStore(name); }
+function put(name,item){ return new Promise((res,rej)=>{ const r=store(name,"readwrite").put(item); r.onsuccess=()=>res(); r.onerror=()=>rej(); }); }
+function getAll(name){ return new Promise((res,rej)=>{ const r=store(name).getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(); }); }
+function getOne(name,id){ return new Promise((res,rej)=>{ const r=store(name).get(id); r.onsuccess=()=>res(r.result||null); r.onerror=()=>rej(); }); }
+function del(name,id){ return new Promise((res,rej)=>{ const r=store(name,"readwrite").delete(id); r.onsuccess=()=>res(); r.onerror=()=>rej(); }); }
+function clearStore(name){ return new Promise((res,rej)=>{ const r=store(name,"readwrite").clear(); r.onsuccess=()=>res(); r.onerror=()=>rej(); }); }
 
-    document.getElementById("data").valueAsDate = new Date();
+function hojeISO(){ return new Date().toISOString().slice(0,10); }
+function formatarData(dataISO){ if(!dataISO) return ""; const [a,m,d]=dataISO.split("-"); return `${d}/${m}/${a}`; }
+function esc(t){ return String(t||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+function escapeAttr(t){ return esc(t).replaceAll('"',"&quot;"); }
 
-    let db = null;
-    let ultimaBusca = [];
+function atualizarDisciplinas(selectTurma, selectDisciplina, valor=""){
+  const turma = $(selectTurma).value;
+  const disciplinas = disciplinasPorTurma[turma] || [];
+  $(selectDisciplina).innerHTML = disciplinas.length
+    ? '<option value="">Selecione</option>' + disciplinas.map(d=>`<option value="${escapeAttr(d)}">${esc(d)}</option>`).join("")
+    : '<option value="">Selecione primeiro a turma</option>';
+  if(valor) $(selectDisciplina).value = valor;
+}
 
-    function abrirBanco() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
+function atualizarDisciplinasDaTurma(valor=""){ atualizarDisciplinas("turma","disciplina",valor); }
+function atualizarFiltroDisciplinasPorTurma(){ atualizarDisciplinas("filtroTurma","filtroDisciplina"); }
+function atualizarDisciplinasPlano(){ atualizarDisciplinas("planoTurma","planoDisciplina"); }
+function atualizarDisciplinasBuscaPlano(){ atualizarDisciplinas("buscaPlanoTurma","buscaPlanoDisciplina"); }
+function atualizarDisciplinasRelatorio(){ atualizarDisciplinas("relTurma","relDisciplina"); }
 
-        request.onupgradeneeded = function(event) {
-          const database = event.target.result;
+document.getElementById("formAgenda").addEventListener("submit", async e => {
+  e.preventDefault();
+  const editId = $("editId").value;
+  const antigo = editId ? await getOne(STORE_REGISTROS, editId) : null;
+  const registro = {
+    id: editId || Date.now().toString(),
+    data: $("data").value,
+    aulaNumero: $("aulaNumero").value.trim(),
+    turma: $("turma").value,
+    disciplina: $("disciplina").value,
+    planoId: $("planoRegistro").value,
+    aula: $("aula").value.trim(),
+    conteudo: $("conteudo").value.trim(),
+    atividade: $("atividade").value.trim(),
+    pendencias: $("pendencias").value.trim(),
+    observacoes: $("observacoes").value.trim(),
+    status: antigo?.status || "Pendente"
+  };
+  await put(STORE_REGISTROS, registro);
+  limparFormulario();
+  await atualizarDashboard();
+  alert("Registro salvo com sucesso!");
+});
 
-          if (!database.objectStoreNames.contains(STORE_REGISTROS)) {
-            const store = database.createObjectStore(STORE_REGISTROS, { keyPath: "id" });
-            store.createIndex("data", "data", { unique: false });
-            store.createIndex("turma", "turma", { unique: false });
-            store.createIndex("disciplina", "disciplina", { unique: false });
-            store.createIndex("status", "status", { unique: false });
-          }
+function limparFormulario(){
+  $("formAgenda").reset();
+  $("editId").value = "";
+  $("data").valueAsDate = new Date();
+  $("disciplina").innerHTML = '<option value="">Selecione primeiro a turma</option>';
+  $("planoRegistro").innerHTML = '<option value="">Selecione turma e disciplina para listar planejamentos</option>';
+  document.querySelector("#formAgenda button[type='submit']").textContent = "Salvar registro";
+}
+
+async function carregarPlanosParaRegistro(){
+  const turma = $("turma").value;
+  const disciplina = $("disciplina").value;
+  if(!turma || !disciplina){
+    $("planoRegistro").innerHTML = '<option value="">Selecione turma e disciplina para listar planejamentos</option>';
+    return;
+  }
+  const planos = (await getAll(STORE_PLANOS)).filter(p=>p.turma===turma && p.disciplina===disciplina);
+  $("planoRegistro").innerHTML = '<option value="">Sem planejamento vinculado</option>' +
+    planos.sort((a,b)=>(Number(a.semana||0)-Number(b.semana||0))).map(p=>`<option value="${p.id}">Semana ${esc(p.semana||"-")} - ${esc(p.aulaNumero||"Aula")}: ${esc(p.assunto)}</option>`).join("");
+}
+
+async function aplicarPlanoNoRegistro(){
+  const id = $("planoRegistro").value;
+  if(!id) return;
+  const p = await getOne(STORE_PLANOS,id);
+  if(!p) return;
+  $("aulaNumero").value = p.aulaNumero || "";
+  $("aula").value = p.assunto || "";
+  $("conteudo").value = p.conteudo || "";
+  $("atividade").value = p.atividade || "";
+  $("pendencias").value = p.pendencias || "";
+}
+
+function registrarAulaHoje(){
+  limparFormulario();
+  $("data").value = hojeISO();
+  abrirTela("telaRegistro");
+}
+
+async function buscarRegistros(){
+  const termo = $("busca").value.toLowerCase().trim();
+  const turma = $("filtroTurma").value;
+  const disciplina = $("filtroDisciplina").value;
+  const data = $("filtroData").value;
+  const de = $("filtroDe").value;
+  const ate = $("filtroAte").value;
+  if(!termo && !turma && !disciplina && !data && !de && !ate){
+    alert("Informe uma data, período, turma/disciplina ou termo de pesquisa.");
+    return;
+  }
+  if((turma && !disciplina) || (!turma && disciplina)){
+    alert("Para pesquisar por turma, selecione também a disciplina.");
+    return;
+  }
+  let registros = await getAll(STORE_REGISTROS);
+  registros = filtrarRegistros(registros,{termo,turma,disciplina,data,de,ate});
+  ultimaBusca = registros;
+  renderizarResultados();
+  abrirTela("telaResultados");
+}
+
+function filtrarRegistros(registros, f){
+  return registros.filter(r=>{
+    const texto = `${r.data} ${r.turma} ${r.disciplina} ${r.aulaNumero} ${r.aula} ${r.conteudo} ${r.atividade} ${r.pendencias} ${r.observacoes}`.toLowerCase();
+    return (!f.termo || texto.includes(f.termo)) &&
+      (!f.turma || r.turma===f.turma) &&
+      (!f.disciplina || r.disciplina===f.disciplina) &&
+      (!f.data || r.data===f.data) &&
+      (!f.de || r.data>=f.de) &&
+      (!f.ate || r.data<=f.ate);
+  }).sort((a,b)=>(b.data||"").localeCompare(a.data||""));
+}
+
+function renderizarResultados(){
+  if(!ultimaBusca.length){
+    $("resumoResultados").textContent = "Nenhum registro encontrado.";
+    $("listaRegistros").innerHTML = '<div class="empty">Nenhum registro encontrado.</div>';
+    return;
+  }
+  $("resumoResultados").textContent = `${ultimaBusca.length} registro(s) encontrado(s).`;
+  $("listaRegistros").innerHTML = ultimaBusca.map(cardRegistro).join("");
+}
+
+function cardRegistro(r){
+  return `<article class="registro ${r.status==="Ministrada"?"ministrada":""}">
+    <div class="meta">${formatarData(r.data)} ${r.aulaNumero? "• "+esc(r.aulaNumero):""}</div>
+    <h3>${esc(r.aula)}</h3>
+    <p><span class="tag">${esc(r.disciplina)}</span><span class="tag">${esc(r.turma)}</span><span class="tag ${r.status==="Ministrada"?"tag-success":"tag-warning"}">${r.status==="Ministrada"?"Aula ministrada":"Aula pendente"}</span></p>
+    <p><strong>Conteúdo:</strong> ${esc(r.conteudo)||"-"}</p>
+    <p><strong>Atividade:</strong> ${esc(r.atividade)||"-"}</p>
+    <p><strong>Pendências:</strong> ${esc(r.pendencias)||"-"}</p>
+    <p><strong>Observações:</strong> ${esc(r.observacoes)||"-"}</p>
+    <div class="actions">
+      <button class="btn-success" onclick="alternarStatusAula('${r.id}')">${r.status==="Ministrada"?"Desmarcar ministrada":"Marcar como ministrada"}</button>
+      <button class="btn-secondary" onclick="editarRegistro('${r.id}')">Editar</button>
+      <button class="btn-warning" onclick="duplicarRegistro('${r.id}')">Duplicar aula</button>
+      <button class="btn-danger" onclick="excluirRegistro('${r.id}')">Excluir</button>
+    </div>
+  </article>`;
+}
+
+async function alternarStatusAula(id){
+  const r = await getOne(STORE_REGISTROS,id);
+  if(!r) return;
+  r.status = r.status==="Ministrada" ? "Pendente" : "Ministrada";
+  await put(STORE_REGISTROS,r);
+  ultimaBusca = ultimaBusca.map(x=>x.id===id?r:x);
+  await atualizarDashboard();
+  renderizarResultados();
+}
+
+async function editarRegistro(id){
+  const r = await getOne(STORE_REGISTROS,id);
+  if(!r) return;
+  $("editId").value = r.id;
+  $("data").value = r.data;
+  $("aulaNumero").value = r.aulaNumero || "";
+  $("turma").value = r.turma;
+  atualizarDisciplinasDaTurma(r.disciplina);
+  await carregarPlanosParaRegistro();
+  $("planoRegistro").value = r.planoId || "";
+  $("aula").value = r.aula;
+  $("conteudo").value = r.conteudo;
+  $("atividade").value = r.atividade;
+  $("pendencias").value = r.pendencias;
+  $("observacoes").value = r.observacoes;
+  document.querySelector("#formAgenda button[type='submit']").textContent = "Atualizar registro";
+  abrirTela("telaRegistro");
+}
+
+async function duplicarRegistro(id){
+  const r = await getOne(STORE_REGISTROS,id);
+  if(!r) return;
+  let novaData = prompt("Nova data da aula duplicada (AAAA-MM-DD):", hojeISO());
+  if(!novaData) return;
+  $("editId").value = "";
+  $("data").value = novaData;
+  $("aulaNumero").value = r.aulaNumero || "";
+  $("turma").value = r.turma;
+  atualizarDisciplinasDaTurma(r.disciplina);
+  await carregarPlanosParaRegistro();
+  $("planoRegistro").value = r.planoId || "";
+  $("aula").value = r.aula;
+  $("conteudo").value = r.conteudo;
+  $("atividade").value = r.atividade;
+  $("pendencias").value = r.pendencias;
+  $("observacoes").value = r.observacoes;
+  document.querySelector("#formAgenda button[type='submit']").textContent = "Salvar aula duplicada";
+  abrirTela("telaRegistro");
+}
+
+async function excluirRegistro(id){
+  if(!confirm("Excluir este registro?")) return;
+  await del(STORE_REGISTROS,id);
+  ultimaBusca = ultimaBusca.filter(x=>x.id!==id);
+  await atualizarDashboard();
+  renderizarResultados();
+}
+
+function limparFiltrosPesquisa(){
+  $("busca").value = "";
+  $("filtroTurma").value = "";
+  $("filtroDisciplina").innerHTML = '<option value="">Todas / selecione primeiro a turma</option>';
+  $("filtroData").value = "";
+  $("filtroPeriodo").value = "";
+  $("filtroDe").value = "";
+  $("filtroAte").value = "";
+}
+
+function aplicarPeriodoRapido(prefixo){
+  const val = $(prefixo+"Periodo").value;
+  const hoje = new Date();
+  let inicio = "", fim = "";
+  if(val==="hoje"){ inicio=fim=hojeISO(); }
+  if(val==="semana"){
+    const d = new Date(hoje);
+    const day = d.getDay() || 7;
+    d.setDate(d.getDate()-day+1);
+    const f = new Date(d); f.setDate(d.getDate()+6);
+    inicio=d.toISOString().slice(0,10); fim=f.toISOString().slice(0,10);
+  }
+  if(val==="mes"){
+    const y=hoje.getFullYear(), m=hoje.getMonth();
+    inicio = new Date(y,m,1).toISOString().slice(0,10);
+    fim = new Date(y,m+1,0).toISOString().slice(0,10);
+  }
+  if(prefixo==="filtro"){ $("filtroDe").value=inicio; $("filtroAte").value=fim; $("filtroData").value = val==="hoje"?inicio:""; }
+  if(prefixo==="rel"){ $("relDe").value=inicio; $("relAte").value=fim; }
+}
+
+$("formPlano").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const id = $("planoId").value || Date.now().toString();
+  const plano = {
+    id,
+    bimestre: $("planoBimestre").value,
+    semana: $("planoSemana").value,
+    aulaNumero: $("planoAulaNumero").value.trim(),
+    turma: $("planoTurma").value,
+    disciplina: $("planoDisciplina").value,
+    assunto: $("planoAssunto").value.trim(),
+    conteudo: $("planoConteudo").value.trim(),
+    atividade: $("planoAtividade").value.trim(),
+    pendencias: $("planoPendencias").value.trim()
+  };
+  if(!plano.turma || !plano.disciplina || !plano.assunto){ alert("Preencha turma, disciplina e assunto."); return; }
+  await put(STORE_PLANOS,plano);
+  limparPlano();
+  alert("Planejamento salvo.");
+});
+
+function limparPlano(){
+  $("formPlano").reset();
+  $("planoId").value = "";
+  $("planoDisciplina").innerHTML = '<option value="">Selecione primeiro a turma</option>';
+}
+
+async function buscarPlanos(){
+  const turma = $("buscaPlanoTurma").value;
+  const disciplina = $("buscaPlanoDisciplina").value;
+  const termo = $("buscaPlanoTexto").value.toLowerCase().trim();
+  let planos = await getAll(STORE_PLANOS);
+  planos = planos.filter(p=>(!turma||p.turma===turma)&&(!disciplina||p.disciplina===disciplina)&&(!termo||`${p.assunto} ${p.conteudo} ${p.atividade}`.toLowerCase().includes(termo)))
+    .sort((a,b)=>Number(a.semana||0)-Number(b.semana||0));
+  $("listaPlanos").innerHTML = planos.length ? planos.map(p=>`<article class="registro">
+    <div class="meta">${esc(p.bimestre)} • Semana ${esc(p.semana||"-")} ${p.aulaNumero? "• "+esc(p.aulaNumero):""}</div>
+    <h3>${esc(p.assunto)}</h3>
+    <p><span class="tag">${esc(p.disciplina)}</span><span class="tag">${esc(p.turma)}</span></p>
+    <p><strong>Conteúdo:</strong> ${esc(p.conteudo)||"-"}</p>
+    <p><strong>Atividade:</strong> ${esc(p.atividade)||"-"}</p>
+    <div class="actions">
+      <button class="btn-secondary" onclick="editarPlano('${p.id}')">Editar</button>
+      <button class="btn-danger" onclick="excluirPlano('${p.id}')">Excluir</button>
+    </div>
+  </article>`).join("") : '<div class="empty">Nenhum planejamento encontrado.</div>';
+}
+
+async function editarPlano(id){
+  const p = await getOne(STORE_PLANOS,id);
+  if(!p) return;
+  $("planoId").value=p.id;
+  $("planoBimestre").value=p.bimestre;
+  $("planoSemana").value=p.semana;
+  $("planoAulaNumero").value=p.aulaNumero||"";
+  $("planoTurma").value=p.turma;
+  atualizarDisciplinasPlano();
+  $("planoDisciplina").value=p.disciplina;
+  $("planoAssunto").value=p.assunto;
+  $("planoConteudo").value=p.conteudo||"";
+  $("planoAtividade").value=p.atividade||"";
+  $("planoPendencias").value=p.pendencias||"";
+}
+
+async function excluirPlano(id){
+  if(!confirm("Excluir planejamento?")) return;
+  await del(STORE_PLANOS,id);
+  buscarPlanos();
+}
+
+async function gerarRelatorio(){
+  const turma = $("relTurma").value, disciplina = $("relDisciplina").value, status = $("relStatus").value;
+  const de = $("relDe").value, ate = $("relAte").value;
+  let regs = await getAll(STORE_REGISTROS);
+  regs = filtrarRegistros(regs,{turma,disciplina,de,ate});
+  if(status) regs = regs.filter(r=>r.status===status);
+  ultimoRelatorio = regs;
+  $("relResumo").textContent = `${regs.length} registro(s) no relatório.`;
+  $("relConteudo").innerHTML = regs.length ? regs.map(r=>`<article class="registro">
+    <div class="meta">${formatarData(r.data)} ${r.aulaNumero?"• "+esc(r.aulaNumero):""}</div>
+    <h3>${esc(r.aula)}</h3>
+    <p><strong>Turma:</strong> ${esc(r.turma)} | <strong>Disciplina:</strong> ${esc(r.disciplina)} | <strong>Status:</strong> ${esc(r.status)}</p>
+    <p><strong>Conteúdo:</strong> ${esc(r.conteudo)||"-"}</p>
+    <p><strong>Atividade:</strong> ${esc(r.atividade)||"-"}</p>
+  </article>`).join("") : '<div class="empty">Nenhum registro para o relatório.</div>';
+}
+
+function exportarRelatorioPDF(){
+  if(!ultimoRelatorio.length){ alert("Gere um relatório primeiro."); return; }
+  window.print();
+}
+
+async function atualizarDashboard(){
+  const regs = await getAll(STORE_REGISTROS);
+  const hoje = hojeISO();
+  const agora = new Date();
+  const mes = String(agora.getMonth()+1).padStart(2,"0");
+  const ano = agora.getFullYear();
+  $("dashHoje").textContent = regs.filter(r=>r.data===hoje).length;
+  $("dashPendentes").textContent = regs.filter(r=>r.status!=="Ministrada").length;
+  $("dashMes").textContent = regs.filter(r=>(r.data||"").startsWith(`${ano}-${mes}`)).length;
+  $("dashTotal").textContent = regs.length;
+  const ult = regs.sort((a,b)=>(b.data||"").localeCompare(a.data||""))[0];
+  $("ultimoRegistro").innerHTML = ult ? cardRegistro(ult) : "Nenhum registro encontrado.";
+}
+
+async function procurarDadosAntigos(){
+  try{
+    const antigos = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY)||"[]");
+    let importados=0;
+    if(Array.isArray(antigos)){
+      for(const a of antigos){
+        const r = {
+          id: a.id || Date.now().toString()+Math.random().toString(16).slice(2),
+          data: a.data||"",
+          turma: a.turma||"",
+          disciplina: a.disciplina||"",
+          aulaNumero: a.aulaNumero||"",
+          aula: a.aula||a.titulo||a.assuntoAula||"Aula",
+          conteudo: a.conteudo||a.descricao||"",
+          atividade: a.atividade||"",
+          pendencias: a.pendencias||"",
+          observacoes: a.observacoes||"",
+          status: a.status||"Pendente"
         };
-
-        request.onsuccess = function(event) {
-          db = event.target.result;
-          resolve(db);
-        };
-
-        request.onerror = function() {
-          reject("Erro ao abrir o banco de dados.");
-        };
-      });
-    }
-
-    function transacao(storeName, mode = "readonly") {
-      return db.transaction(storeName, mode).objectStore(storeName);
-    }
-
-    function salvarRegistroBanco(registro) {
-      return new Promise((resolve, reject) => {
-        const store = transacao(STORE_REGISTROS, "readwrite");
-        const request = store.put(registro);
-
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject("Erro ao salvar registro.");
-      });
-    }
-
-    function carregarRegistrosBanco() {
-      return new Promise((resolve, reject) => {
-        const store = transacao(STORE_REGISTROS, "readonly");
-        const request = store.getAll();
-
-        request.onsuccess = () => resolve(request.result || []);
-        request.onerror = () => reject("Erro ao carregar registros.");
-      });
-    }
-
-    function buscarRegistroPorId(id) {
-      return new Promise((resolve, reject) => {
-        const store = transacao(STORE_REGISTROS, "readonly");
-        const request = store.get(id);
-
-        request.onsuccess = () => resolve(request.result || null);
-        request.onerror = () => reject("Erro ao buscar registro.");
-      });
-    }
-
-    function excluirRegistroBanco(id) {
-      return new Promise((resolve, reject) => {
-        const store = transacao(STORE_REGISTROS, "readwrite");
-        const request = store.delete(id);
-
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject("Erro ao excluir registro.");
-      });
-    }
-
-    function apagarTodosRegistrosBanco() {
-      return new Promise((resolve, reject) => {
-        const store = transacao(STORE_REGISTROS, "readwrite");
-        const request = store.clear();
-
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject("Erro ao apagar registros.");
-      });
-    }
-
-    async function migrarLocalStorageParaBanco() {
-      try {
-        const jaMigrou = localStorage.getItem("agenda_aulas_migrado_indexeddb_v1");
-        if (jaMigrou === "sim") return;
-
-        const antigos = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) || "[]");
-
-        if (Array.isArray(antigos) && antigos.length > 0) {
-          const atuais = await carregarRegistrosBanco();
-
-          for (const antigo of antigos) {
-            const registro = {
-              id: antigo.id || Date.now().toString() + Math.random().toString(16).slice(2),
-              data: antigo.data || "",
-              turma: antigo.turma || "",
-              disciplina: antigo.disciplina || "",
-              aula: antigo.aula || antigo.titulo || antigo.assuntoAula || "Aula",
-              conteudo: antigo.conteudo || antigo.descricao || "",
-              atividade: antigo.atividade || "",
-              pendencias: antigo.pendencias || "",
-              observacoes: antigo.observacoes || "",
-              status: antigo.status || "Pendente"
-            };
-
-            const jaExiste = atuais.some(r =>
-              r.data === registro.data &&
-              r.turma === registro.turma &&
-              r.disciplina === registro.disciplina &&
-              r.aula === registro.aula
-            );
-
-            if (!jaExiste) {
-              await salvarRegistroBanco(registro);
-            }
-          }
-        }
-
-        localStorage.setItem("agenda_aulas_migrado_indexeddb_v1", "sim");
-      } catch (erro) {
-        console.warn("Migração não realizada:", erro);
+        await put(STORE_REGISTROS,r); importados++;
       }
     }
+    await atualizarDashboard();
+    alert(importados+" registro(s) recuperado(s).");
+  }catch(e){ alert("Não foi possível recuperar dados antigos."); }
+}
 
-    function abrirTela(id) {
-      document.querySelectorAll(".screen").forEach(tela => tela.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+async function exportarBackupJSON(){
+  const registros = await getAll(STORE_REGISTROS);
+  const planejamentos = await getAll(STORE_PLANOS);
+  baixarArquivo("backup-agenda-aulas.json", JSON.stringify({registros, planejamentos}, null, 2), "application/json");
+}
 
-    function abrirResultados() {
-      abrirTela("telaResultados");
-    }
+function importarBackupJSON(ev){
+  const arq = ev.target.files[0]; if(!arq) return;
+  const reader = new FileReader();
+  reader.onload = async e=>{
+    try{
+      const dados = JSON.parse(e.target.result);
+      const registros = Array.isArray(dados) ? dados : (dados.registros||[]);
+      const planejamentos = dados.planejamentos||[];
+      for(const r of registros){ if(!r.id) r.id=Date.now().toString()+Math.random().toString(16).slice(2); if(!r.status) r.status="Pendente"; await put(STORE_REGISTROS,r); }
+      for(const p of planejamentos){ if(!p.id) p.id=Date.now().toString()+Math.random().toString(16).slice(2); await put(STORE_PLANOS,p); }
+      await atualizarDashboard();
+      alert("Backup importado.");
+    }catch(err){ alert("Erro ao importar backup."); }
+  };
+  reader.readAsText(arq); ev.target.value="";
+}
 
-    function atualizarDisciplinasDaTurma(valorSelecionado = "") {
-      const turma = turmaSelect.value;
-      const disciplinas = disciplinasPorTurma[turma] || [];
-
-      disciplinaSelect.innerHTML = disciplinas.length
-        ? '<option value="">Selecione a disciplina</option>' + disciplinas.map(d => `<option value="${escapeAttr(d)}">${escapeHTML(d)}</option>`).join("")
-        : '<option value="">Selecione primeiro a turma</option>';
-
-      if (valorSelecionado) {
-        disciplinaSelect.value = valorSelecionado;
-      }
-    }
-
-    function atualizarFiltroDisciplinasPorTurma() {
-      const turmaSelecionada = filtroTurma.value;
-      const disciplinas = disciplinasPorTurma[turmaSelecionada] || [];
-
-      filtroDisciplina.innerHTML = disciplinas.length
-        ? '<option value="">Selecione a disciplina</option>' + disciplinas.map(d => `<option value="${escapeAttr(d)}">${escapeHTML(d)}</option>`).join("")
-        : '<option value="">Selecione primeiro a turma</option>';
-    }
-
-    form.addEventListener("submit", async function(e) {
-      e.preventDefault();
-
-      const editId = document.getElementById("editId").value;
-      const registroAntigo = editId ? await buscarRegistroPorId(editId) : null;
-
-      const registro = {
-        id: editId || Date.now().toString(),
-        data: document.getElementById("data").value,
-        turma: turmaSelect.value,
-        disciplina: disciplinaSelect.value,
-        aula: document.getElementById("aula").value.trim(),
-        conteudo: document.getElementById("conteudo").value.trim(),
-        atividade: document.getElementById("atividade").value.trim(),
-        pendencias: document.getElementById("pendencias").value.trim(),
-        observacoes: document.getElementById("observacoes").value.trim(),
-        status: registroAntigo && registroAntigo.status ? registroAntigo.status : "Pendente"
-      };
-
-      await salvarRegistroBanco(registro);
-
-      limparFormulario();
-      alert("Registro salvo no banco de dados com sucesso!");
-    });
-
-    function limparFormulario() {
-      form.reset();
-      document.getElementById("editId").value = "";
-      document.getElementById("data").valueAsDate = new Date();
-      disciplinaSelect.innerHTML = '<option value="">Selecione primeiro a turma</option>';
-      form.querySelector("button[type='submit']").textContent = "Salvar registro";
-    }
-
-    function formatarData(dataISO) {
-      if (!dataISO) return "";
-      const [ano, mes, dia] = dataISO.split("-");
-      return `${dia}/${mes}/${ano}`;
-    }
-
-    async function buscarRegistros() {
-      const termo = busca.value.toLowerCase().trim();
-      const turmaSelecionada = filtroTurma.value;
-      const disciplinaSelecionada = filtroDisciplina.value;
-      const dataSelecionada = filtroData.value;
-
-      if (!termo && !turmaSelecionada && !disciplinaSelecionada && !dataSelecionada) {
-        alert("Informe pelo menos uma data, turma/disciplina ou termo de pesquisa.");
-        return;
-      }
-
-      if ((turmaSelecionada && !disciplinaSelecionada) || (!turmaSelecionada && disciplinaSelecionada)) {
-        alert("Para pesquisar por turma, selecione também a disciplina. Se quiser ver tudo do dia, use somente a data.");
-        return;
-      }
-
-      let registros = await carregarRegistrosBanco();
-
-      registros.sort((a, b) => (b.data || "").localeCompare(a.data || ""));
-
-      registros = registros.filter(r => {
-        const texto = `${r.data} ${r.turma} ${r.disciplina} ${r.aula} ${r.conteudo} ${r.atividade} ${r.pendencias} ${r.observacoes}`.toLowerCase();
-        const passaBusca = !termo || texto.includes(termo);
-        const passaTurma = !turmaSelecionada || r.turma === turmaSelecionada;
-        const passaDisciplina = !disciplinaSelecionada || r.disciplina === disciplinaSelecionada;
-        const passaData = !dataSelecionada || r.data === dataSelecionada;
-        return passaBusca && passaTurma && passaDisciplina && passaData;
-      });
-
-      ultimaBusca = registros;
-      renderizarResultados();
-      abrirResultados();
-    }
-
-    function renderizarResultados() {
-      if (ultimaBusca.length === 0) {
-        resumoResultados.textContent = "Nenhum registro encontrado para essa pesquisa.";
-        lista.innerHTML = `<div class="empty">Nenhum registro encontrado.</div>`;
-        return;
-      }
-
-      resumoResultados.textContent = `${ultimaBusca.length} registro(s) encontrado(s).`;
-
-      lista.innerHTML = ultimaBusca.map(r => `
-        <article class="registro ${r.status === "Ministrada" ? "ministrada" : ""}">
-          <div class="meta">${formatarData(r.data)}</div>
-          <h3>${escapeHTML(r.aula)}</h3>
-          <p>
-            <span class="tag">${escapeHTML(r.disciplina)}</span>
-            <span class="tag">${escapeHTML(r.turma)}</span>
-            <span class="tag ${r.status === "Ministrada" ? "tag-success" : "tag-warning"}">
-              ${r.status === "Ministrada" ? "Aula ministrada" : "Aula pendente"}
-            </span>
-          </p>
-          <p><strong>Conteúdo:</strong> ${escapeHTML(r.conteudo) || "-"}</p>
-          <p><strong>Atividade:</strong> ${escapeHTML(r.atividade) || "-"}</p>
-          <p><strong>Pendências / próxima aula:</strong> ${escapeHTML(r.pendencias) || "-"}</p>
-          <p><strong>Observações:</strong> ${escapeHTML(r.observacoes) || "-"}</p>
-          <div class="actions">
-            <button class="btn-success" onclick="alternarStatusAula('${r.id}')">
-              ${r.status === "Ministrada" ? "Desmarcar ministrada" : "Marcar como ministrada"}
-            </button>
-            <button class="btn-secondary" onclick="editarRegistro('${r.id}')">Editar</button>
-            <button class="btn-warning" onclick="duplicarRegistro('${r.id}')">Duplicar aula</button>
-            <button class="btn-danger" onclick="excluirRegistro('${r.id}')">Excluir</button>
-          </div>
-        </article>
-      `).join("");
-    }
-
-    async function alternarStatusAula(id) {
-      const registro = await buscarRegistroPorId(id);
-      if (!registro) return;
-
-      registro.status = registro.status === "Ministrada" ? "Pendente" : "Ministrada";
-      await salvarRegistroBanco(registro);
-
-      ultimaBusca = ultimaBusca.map(item => item.id === id ? registro : item);
-      renderizarResultados();
-    }
-
-    async function editarRegistro(id) {
-      const r = await buscarRegistroPorId(id);
-      if (!r) return;
-
-      document.getElementById("editId").value = r.id;
-      document.getElementById("data").value = r.data;
-      turmaSelect.value = r.turma;
-      atualizarDisciplinasDaTurma(r.disciplina);
-      document.getElementById("aula").value = r.aula;
-      document.getElementById("conteudo").value = r.conteudo;
-      document.getElementById("atividade").value = r.atividade;
-      document.getElementById("pendencias").value = r.pendencias;
-      document.getElementById("observacoes").value = r.observacoes;
-
-      form.querySelector("button[type='submit']").textContent = "Atualizar registro";
-      abrirTela("telaRegistro");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    async function duplicarRegistro(id) {
-      const r = await buscarRegistroPorId(id);
-      if (!r) return;
-
-      document.getElementById("editId").value = "";
-      document.getElementById("data").valueAsDate = new Date();
-      turmaSelect.value = r.turma;
-      atualizarDisciplinasDaTurma(r.disciplina);
-      document.getElementById("aula").value = r.aula;
-      document.getElementById("conteudo").value = r.conteudo;
-      document.getElementById("atividade").value = r.atividade;
-      document.getElementById("pendencias").value = r.pendencias;
-      document.getElementById("observacoes").value = r.observacoes;
-
-      form.querySelector("button[type='submit']").textContent = "Salvar aula duplicada";
-      abrirTela("telaRegistro");
-      alert("Aula duplicada. Confira a data e clique em Salvar aula duplicada.");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    async function excluirRegistro(id) {
-      if (!confirm("Deseja excluir este registro?")) return;
-
-      await excluirRegistroBanco(id);
-
-      ultimaBusca = ultimaBusca.filter(item => item.id !== id);
-      renderizarResultados();
-    }
-
-    function limparFiltrosPesquisa() {
-      busca.value = "";
-      filtroTurma.value = "";
-      filtroDisciplina.innerHTML = '<option value="">Selecione primeiro a turma</option>';
-      filtroData.value = "";
-    }
-
-    async function apagarTudo() {
-      if (!confirm("Tem certeza que deseja apagar todos os registros do banco?")) return;
-
-      await apagarTodosRegistrosBanco();
-      ultimaBusca = [];
-      renderizarResultados();
-      alert("Todos os registros foram apagados do banco.");
-    }
-
-    async function procurarDadosAntigos() {
-      await migrarLocalStorageParaBanco();
-      alert("Busca por dados antigos concluída. Agora pesquise a turma e disciplina para verificar.");
-    }
-
-    async function exportarBackupJSON() {
-      const registros = await carregarRegistrosBanco();
-      const blob = new Blob([JSON.stringify(registros, null, 2)], { type: "application/json;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "backup-agenda-de-aulas-indexeddb.json";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function importarBackupJSON(event) {
-      const arquivo = event.target.files[0];
-      if (!arquivo) return;
-
-      const leitor = new FileReader();
-
-      leitor.onload = async function(e) {
-        try {
-          const dados = JSON.parse(e.target.result);
-
-          if (!Array.isArray(dados)) {
-            alert("Arquivo inválido. O backup precisa estar em formato JSON da agenda.");
-            return;
-          }
-
-          for (const registro of dados) {
-            if (!registro.id) {
-              registro.id = Date.now().toString() + Math.random().toString(16).slice(2);
-            }
-
-            if (!registro.status) {
-              registro.status = "Pendente";
-            }
-
-            await salvarRegistroBanco(registro);
-          }
-
-          ultimaBusca = [];
-          renderizarResultados();
-          alert("Backup importado para o banco de dados com sucesso!");
-        } catch (erro) {
-          alert("Não foi possível importar o backup.");
-        }
-      };
-
-      leitor.readAsText(arquivo);
-      event.target.value = "";
-    }
-
-    async function exportarTXT() {
-      const registros = await carregarRegistrosBanco();
-
-      if (registros.length === 0) {
-        alert("Não há registros para exportar.");
-        return;
-      }
-
-      const texto = registros
-        .sort((a, b) => (a.data || "").localeCompare(b.data || ""))
-        .map(r => `
+async function exportarTXT(){
+  const regs = await getAll(STORE_REGISTROS);
+  if(!regs.length){ alert("Não há registros."); return; }
+  const texto = regs.sort((a,b)=>(a.data||"").localeCompare(b.data||"")).map(r=>`
 DATA: ${formatarData(r.data)}
 TURMA: ${r.turma}
 DISCIPLINA: ${r.disciplina}
+AULA Nº: ${r.aulaNumero||"-"}
 AULA/TEMA: ${r.aula}
-STATUS: ${r.status || "Pendente"}
-CONTEÚDO MINISTRADO: ${r.conteudo}
-ATIVIDADE REALIZADA: ${r.atividade || "-"}
-PENDÊNCIAS / PRÓXIMA AULA: ${r.pendencias || "-"}
-OBSERVAÇÕES: ${r.observacoes || "-"}
-------------------------------------------------------------
-`).join("\n");
+STATUS: ${r.status}
+CONTEÚDO: ${r.conteudo}
+ATIVIDADE: ${r.atividade||"-"}
+PENDÊNCIAS: ${r.pendencias||"-"}
+OBSERVAÇÕES: ${r.observacoes||"-"}
+------------------------------------------------------------`).join("\n");
+  baixarArquivo("agenda-de-aulas.txt", texto, "text/plain;charset=utf-8");
+}
 
-      const blob = new Blob([texto], { type: "text/plain;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "agenda-de-aulas.txt";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+function baixarArquivo(nome, conteudo, tipo){
+  const blob = new Blob([conteudo],{type:tipo});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href=url; a.download=nome; a.click(); URL.revokeObjectURL(url);
+}
 
-    function escapeHTML(text) {
-      return String(text || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
+async function apagarTudo(){
+  if(!confirm("Apagar todos os registros e planejamentos?")) return;
+  await clearStore(STORE_REGISTROS);
+  await clearStore(STORE_PLANOS);
+  ultimaBusca=[]; ultimoRelatorio=[];
+  renderizarResultados();
+  await atualizarDashboard();
+  alert("Dados apagados.");
+}
 
-    function escapeAttr(text) {
-      return escapeHTML(text).replaceAll('"', "&quot;");
-    }
+function alternarTema(){
+  document.body.classList.toggle("dark");
+  localStorage.setItem("tema_agenda_aulas", document.body.classList.contains("dark") ? "dark" : "light");
+}
 
-    async function iniciarApp() {
-      try {
-        await abrirBanco();
-        await migrarLocalStorageParaBanco();
-        dbStatus.textContent = "Banco de dados conectado.";
-        renderizarResultados();
-      } catch (erro) {
-        dbStatus.textContent = "Erro ao conectar o banco de dados.";
-        alert("Não foi possível abrir o banco de dados interno do navegador.");
-      }
-    }
+async function iniciarApp(){
+  await abrirBanco();
+  if(localStorage.getItem("tema_agenda_aulas")==="dark") document.body.classList.add("dark");
+  $("dbStatus").textContent = "Banco conectado.";
+  renderizarResultados();
+  await atualizarDashboard();
+}
 
-    iniciarApp();
-  </script>
+iniciarApp();
+</script>
 
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./service-worker.js");
-      });
-    }
-  </script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
+}
+</script>
 </body>
 </html>
