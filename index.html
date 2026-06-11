@@ -774,6 +774,7 @@
               ${r.status === "Ministrada" ? "Desmarcar ministrada" : "Marcar como ministrada"}
             </button>
             <button class="btn-secondary" onclick="editarRegistro('${r.id}')">Editar</button>
+            <button class="btn-warning" onclick="duplicarRegistro('${r.id}')">Duplicar aula</button>
             <button class="btn-danger" onclick="excluirRegistro('${r.id}')">Excluir</button>
           </div>
         </article>
@@ -807,6 +808,26 @@
 
       form.querySelector("button[type='submit']").textContent = "Atualizar registro";
       abrirTela("telaRegistro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function duplicarRegistro(id) {
+      const r = await buscarRegistroPorId(id);
+      if (!r) return;
+
+      document.getElementById("editId").value = "";
+      document.getElementById("data").valueAsDate = new Date();
+      turmaSelect.value = r.turma;
+      atualizarDisciplinasDaTurma(r.disciplina);
+      document.getElementById("aula").value = r.aula;
+      document.getElementById("conteudo").value = r.conteudo;
+      document.getElementById("atividade").value = r.atividade;
+      document.getElementById("pendencias").value = r.pendencias;
+      document.getElementById("observacoes").value = r.observacoes;
+
+      form.querySelector("button[type='submit']").textContent = "Salvar aula duplicada";
+      abrirTela("telaRegistro");
+      alert("Aula duplicada. Confira a data e clique em Salvar aula duplicada.");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
