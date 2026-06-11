@@ -300,6 +300,7 @@
       <div class="welcome">
         <h2>Bem-vindo à sua Agenda de Aulas</h2>
         <p>Escolha uma opção abaixo para registrar aulas, pesquisar conteúdos, ver resultados ou fazer backup dos seus dados.</p>
+        <p id="dbStatus" style="margin-top:10px;font-size:13px;color:#1e40af;font-weight:bold;">Carregando banco de dados...</p>
       </div>
 
       <div class="home-grid">
@@ -403,7 +404,7 @@
         <h2>Pesquisar aulas</h2>
 
         <div class="status-box">
-          Escolha a turma e a disciplina. Depois toque em <strong>Buscar aulas</strong>. Os registros aparecerão somente na aba <strong>Resultados</strong>.
+          Você pode pesquisar de duas formas: selecione <strong>somente a data</strong> para ver todas as aulas do dia, ou selecione <strong>turma + disciplina</strong> para uma busca específica. Os registros aparecem na aba <strong>Resultados</strong>.
         </div>
 
         <div class="grid">
@@ -480,7 +481,10 @@
   </footer>
 
   <script>
-    const STORAGE_KEY = "agenda_aulas_professor_v2";
+    const DB_NAME = "AgendaAulasDB";
+    const DB_VERSION = 1;
+    const STORE_REGISTROS = "registros";
+    const LEGACY_STORAGE_KEY = "agenda_aulas_professor_v2";
 
     const disciplinasPorTurma = {
       "1 ano de programação de jogos": [
@@ -505,10 +509,136 @@
     const turmaSelect = document.getElementById("turma");
     const disciplinaSelect = document.getElementById("disciplina");
     const resumoResultados = document.getElementById("resumoResultados");
+    const dbStatus = document.getElementById("dbStatus");
 
     document.getElementById("data").valueAsDate = new Date();
 
+    let db = null;
     let ultimaBusca = [];
+
+    function abrirBanco() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onupgradeneeded = function(event) {
+          const database = event.target.result;
+
+          if (!database.objectStoreNames.contains(STORE_REGISTROS)) {
+            const store = database.createObjectStore(STORE_REGISTROS, { keyPath: "id" });
+            store.createIndex("data", "data", { unique: false });
+            store.createIndex("turma", "turma", { unique: false });
+            store.createIndex("disciplina", "disciplina", { unique: false });
+            store.createIndex("status", "status", { unique: false });
+          }
+        };
+
+        request.onsuccess = function(event) {
+          db = event.target.result;
+          resolve(db);
+        };
+
+        request.onerror = function() {
+          reject("Erro ao abrir o banco de dados.");
+        };
+      });
+    }
+
+    function transacao(storeName, mode = "readonly") {
+      return db.transaction(storeName, mode).objectStore(storeName);
+    }
+
+    function salvarRegistroBanco(registro) {
+      return new Promise((resolve, reject) => {
+        const store = transacao(STORE_REGISTROS, "readwrite");
+        const request = store.put(registro);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject("Erro ao salvar registro.");
+      });
+    }
+
+    function carregarRegistrosBanco() {
+      return new Promise((resolve, reject) => {
+        const store = transacao(STORE_REGISTROS, "readonly");
+        const request = store.getAll();
+
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject("Erro ao carregar registros.");
+      });
+    }
+
+    function buscarRegistroPorId(id) {
+      return new Promise((resolve, reject) => {
+        const store = transacao(STORE_REGISTROS, "readonly");
+        const request = store.get(id);
+
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject("Erro ao buscar registro.");
+      });
+    }
+
+    function excluirRegistroBanco(id) {
+      return new Promise((resolve, reject) => {
+        const store = transacao(STORE_REGISTROS, "readwrite");
+        const request = store.delete(id);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject("Erro ao excluir registro.");
+      });
+    }
+
+    function apagarTodosRegistrosBanco() {
+      return new Promise((resolve, reject) => {
+        const store = transacao(STORE_REGISTROS, "readwrite");
+        const request = store.clear();
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject("Erro ao apagar registros.");
+      });
+    }
+
+    async function migrarLocalStorageParaBanco() {
+      try {
+        const jaMigrou = localStorage.getItem("agenda_aulas_migrado_indexeddb_v1");
+        if (jaMigrou === "sim") return;
+
+        const antigos = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) || "[]");
+
+        if (Array.isArray(antigos) && antigos.length > 0) {
+          const atuais = await carregarRegistrosBanco();
+
+          for (const antigo of antigos) {
+            const registro = {
+              id: antigo.id || Date.now().toString() + Math.random().toString(16).slice(2),
+              data: antigo.data || "",
+              turma: antigo.turma || "",
+              disciplina: antigo.disciplina || "",
+              aula: antigo.aula || antigo.titulo || antigo.assuntoAula || "Aula",
+              conteudo: antigo.conteudo || antigo.descricao || "",
+              atividade: antigo.atividade || "",
+              pendencias: antigo.pendencias || "",
+              observacoes: antigo.observacoes || "",
+              status: antigo.status || "Pendente"
+            };
+
+            const jaExiste = atuais.some(r =>
+              r.data === registro.data &&
+              r.turma === registro.turma &&
+              r.disciplina === registro.disciplina &&
+              r.aula === registro.aula
+            );
+
+            if (!jaExiste) {
+              await salvarRegistroBanco(registro);
+            }
+          }
+        }
+
+        localStorage.setItem("agenda_aulas_migrado_indexeddb_v1", "sim");
+      } catch (erro) {
+        console.warn("Migração não realizada:", erro);
+      }
+    }
 
     function abrirTela(id) {
       document.querySelectorAll(".screen").forEach(tela => tela.classList.remove("active"));
@@ -542,19 +672,11 @@
         : '<option value="">Selecione primeiro a turma</option>';
     }
 
-    function carregarRegistros() {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    }
-
-    function salvarRegistros(registros) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
-    }
-
-    form.addEventListener("submit", function(e) {
+    form.addEventListener("submit", async function(e) {
       e.preventDefault();
 
       const editId = document.getElementById("editId").value;
-      let registros = carregarRegistros();
+      const registroAntigo = editId ? await buscarRegistroPorId(editId) : null;
 
       const registro = {
         id: editId || Date.now().toString(),
@@ -566,20 +688,13 @@
         atividade: document.getElementById("atividade").value.trim(),
         pendencias: document.getElementById("pendencias").value.trim(),
         observacoes: document.getElementById("observacoes").value.trim(),
-        status: "Pendente"
+        status: registroAntigo && registroAntigo.status ? registroAntigo.status : "Pendente"
       };
 
-      if (editId) {
-        const registroAntigo = registros.find(item => item.id === editId);
-        registro.status = registroAntigo && registroAntigo.status ? registroAntigo.status : "Pendente";
-        registros = registros.map(item => item.id === editId ? registro : item);
-      } else {
-        registros.push(registro);
-      }
+      await salvarRegistroBanco(registro);
 
-      salvarRegistros(registros);
       limparFormulario();
-      alert("Registro salvo com sucesso!");
+      alert("Registro salvo no banco de dados com sucesso!");
     });
 
     function limparFormulario() {
@@ -596,26 +711,31 @@
       return `${dia}/${mes}/${ano}`;
     }
 
-    function buscarRegistros() {
+    async function buscarRegistros() {
       const termo = busca.value.toLowerCase().trim();
       const turmaSelecionada = filtroTurma.value;
       const disciplinaSelecionada = filtroDisciplina.value;
       const dataSelecionada = filtroData.value;
 
-      if (!turmaSelecionada || !disciplinaSelecionada) {
-        alert("Selecione uma turma e uma disciplina para pesquisar.");
+      if (!termo && !turmaSelecionada && !disciplinaSelecionada && !dataSelecionada) {
+        alert("Informe pelo menos uma data, turma/disciplina ou termo de pesquisa.");
         return;
       }
 
-      let registros = carregarRegistros();
+      if ((turmaSelecionada && !disciplinaSelecionada) || (!turmaSelecionada && disciplinaSelecionada)) {
+        alert("Para pesquisar por turma, selecione também a disciplina. Se quiser ver tudo do dia, use somente a data.");
+        return;
+      }
+
+      let registros = await carregarRegistrosBanco();
 
       registros.sort((a, b) => (b.data || "").localeCompare(a.data || ""));
 
       registros = registros.filter(r => {
         const texto = `${r.data} ${r.turma} ${r.disciplina} ${r.aula} ${r.conteudo} ${r.atividade} ${r.pendencias} ${r.observacoes}`.toLowerCase();
         const passaBusca = !termo || texto.includes(termo);
-        const passaTurma = r.turma === turmaSelecionada;
-        const passaDisciplina = r.disciplina === disciplinaSelecionada;
+        const passaTurma = !turmaSelecionada || r.turma === turmaSelecionada;
+        const passaDisciplina = !disciplinaSelecionada || r.disciplina === disciplinaSelecionada;
         const passaData = !dataSelecionada || r.data === dataSelecionada;
         return passaBusca && passaTurma && passaDisciplina && passaData;
       });
@@ -660,31 +780,19 @@
       `).join("");
     }
 
-    function alternarStatusAula(id) {
-      let registros = carregarRegistros();
+    async function alternarStatusAula(id) {
+      const registro = await buscarRegistroPorId(id);
+      if (!registro) return;
 
-      registros = registros.map(item => {
-        if (item.id === id) {
-          item.status = item.status === "Ministrada" ? "Pendente" : "Ministrada";
-        }
-        return item;
-      });
+      registro.status = registro.status === "Ministrada" ? "Pendente" : "Ministrada";
+      await salvarRegistroBanco(registro);
 
-      salvarRegistros(registros);
-
-      ultimaBusca = ultimaBusca.map(item => {
-        if (item.id === id) {
-          item.status = item.status === "Ministrada" ? "Pendente" : "Ministrada";
-        }
-        return item;
-      });
-
+      ultimaBusca = ultimaBusca.map(item => item.id === id ? registro : item);
       renderizarResultados();
     }
 
-    function editarRegistro(id) {
-      const registros = carregarRegistros();
-      const r = registros.find(item => item.id === id);
+    async function editarRegistro(id) {
+      const r = await buscarRegistroPorId(id);
       if (!r) return;
 
       document.getElementById("editId").value = r.id;
@@ -702,11 +810,10 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    function excluirRegistro(id) {
+    async function excluirRegistro(id) {
       if (!confirm("Deseja excluir este registro?")) return;
 
-      const registros = carregarRegistros().filter(item => item.id !== id);
-      salvarRegistros(registros);
+      await excluirRegistroBanco(id);
 
       ultimaBusca = ultimaBusca.filter(item => item.id !== id);
       renderizarResultados();
@@ -719,86 +826,27 @@
       filtroData.value = "";
     }
 
-    function apagarTudo() {
-      if (!confirm("Tem certeza que deseja apagar todos os registros?")) return;
-      localStorage.removeItem(STORAGE_KEY);
+    async function apagarTudo() {
+      if (!confirm("Tem certeza que deseja apagar todos os registros do banco?")) return;
+
+      await apagarTodosRegistrosBanco();
       ultimaBusca = [];
       renderizarResultados();
-      alert("Todos os registros foram apagados.");
+      alert("Todos os registros foram apagados do banco.");
     }
 
-    function procurarDadosAntigos() {
-      const chavesPossiveis = [
-        "agenda_aulas_professor_v2",
-        "agenda_aulas_professor_v1",
-        "agendaProfessorTarefas_v2",
-        "agendaProfessorTarefas_v3",
-        "agenda_professor_tarefas_v4",
-        "agendaProfessorPlanejamento_v1",
-        "agenda_professor_planos_v1"
-      ];
-
-      let encontrados = [];
-
-      chavesPossiveis.forEach(chave => {
-        try {
-          const dados = JSON.parse(localStorage.getItem(chave) || "null");
-          if (Array.isArray(dados) && dados.length > 0) {
-            encontrados.push({ chave, dados });
-          }
-        } catch (e) {}
-      });
-
-      if (encontrados.length === 0) {
-        alert("Não encontrei dados antigos neste navegador. Tente abrir o arquivo antigo da agenda.");
-        return;
-      }
-
-      let registrosAtuais = carregarRegistros();
-      let importados = 0;
-
-      encontrados.forEach(item => {
-        item.dados.forEach(dado => {
-          if (dado.data && dado.turma && dado.disciplina && (dado.aula || dado.titulo || dado.assuntoAula)) {
-            const registro = {
-              id: dado.id || Date.now().toString() + Math.random().toString(16).slice(2),
-              data: dado.data,
-              turma: dado.turma,
-              disciplina: dado.disciplina,
-              aula: dado.aula || dado.assuntoAula || dado.titulo || "Aula",
-              conteudo: dado.conteudo || dado.descricao || "",
-              atividade: dado.atividade || "",
-              pendencias: dado.pendencias || "",
-              observacoes: dado.observacoes || "",
-              status: dado.status || "Pendente"
-            };
-
-            const jaExiste = registrosAtuais.some(r =>
-              r.data === registro.data &&
-              r.turma === registro.turma &&
-              r.disciplina === registro.disciplina &&
-              r.aula === registro.aula
-            );
-
-            if (!jaExiste) {
-              registrosAtuais.push(registro);
-              importados++;
-            }
-          }
-        });
-      });
-
-      salvarRegistros(registrosAtuais);
-      alert(importados + " registro(s) recuperado(s).");
+    async function procurarDadosAntigos() {
+      await migrarLocalStorageParaBanco();
+      alert("Busca por dados antigos concluída. Agora pesquise a turma e disciplina para verificar.");
     }
 
-    function exportarBackupJSON() {
-      const registros = carregarRegistros();
+    async function exportarBackupJSON() {
+      const registros = await carregarRegistrosBanco();
       const blob = new Blob([JSON.stringify(registros, null, 2)], { type: "application/json;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "backup-agenda-de-aulas.json";
+      a.download = "backup-agenda-de-aulas-indexeddb.json";
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -809,7 +857,7 @@
 
       const leitor = new FileReader();
 
-      leitor.onload = function(e) {
+      leitor.onload = async function(e) {
         try {
           const dados = JSON.parse(e.target.result);
 
@@ -818,10 +866,21 @@
             return;
           }
 
-          salvarRegistros(dados);
+          for (const registro of dados) {
+            if (!registro.id) {
+              registro.id = Date.now().toString() + Math.random().toString(16).slice(2);
+            }
+
+            if (!registro.status) {
+              registro.status = "Pendente";
+            }
+
+            await salvarRegistroBanco(registro);
+          }
+
           ultimaBusca = [];
           renderizarResultados();
-          alert("Backup importado com sucesso!");
+          alert("Backup importado para o banco de dados com sucesso!");
         } catch (erro) {
           alert("Não foi possível importar o backup.");
         }
@@ -831,8 +890,8 @@
       event.target.value = "";
     }
 
-    function exportarTXT() {
-      const registros = carregarRegistros();
+    async function exportarTXT() {
+      const registros = await carregarRegistrosBanco();
 
       if (registros.length === 0) {
         alert("Não há registros para exportar.");
@@ -876,7 +935,19 @@ OBSERVAÇÕES: ${r.observacoes || "-"}
       return escapeHTML(text).replaceAll('"', "&quot;");
     }
 
-    renderizarResultados();
+    async function iniciarApp() {
+      try {
+        await abrirBanco();
+        await migrarLocalStorageParaBanco();
+        dbStatus.textContent = "Banco de dados conectado.";
+        renderizarResultados();
+      } catch (erro) {
+        dbStatus.textContent = "Erro ao conectar o banco de dados.";
+        alert("Não foi possível abrir o banco de dados interno do navegador.");
+      }
+    }
+
+    iniciarApp();
   </script>
 
   <script>
