@@ -290,6 +290,10 @@
 
       <div class="actions">
         <button class="btn-secondary" type="button" onclick="limparFiltrosPesquisa()">Limpar pesquisa</button>
+        <button class="btn-success" type="button" onclick="procurarDadosAntigos()">Procurar dados antigos</button>
+        <button class="btn-secondary" type="button" onclick="exportarBackupJSON()">Exportar backup JSON</button>
+        <button class="btn-secondary" type="button" onclick="document.getElementById('arquivoBackupJSON').click()">Importar backup JSON</button>
+        <input type="file" id="arquivoBackupJSON" accept=".json" style="display:none" onchange="importarBackupJSON(event)">
       </div>
 
       <div id="listaRegistros"></div>
@@ -525,6 +529,115 @@
       atualizarFiltroDisciplinas();
       renderizarRegistros();
     }
+
+
+    function procurarDadosAntigos() {
+      const chavesPossiveis = [
+        "agenda_aulas_professor_v2",
+        "agenda_aulas_professor_v1",
+        "agendaProfessorTarefas_v2",
+        "agendaProfessorTarefas_v3",
+        "agenda_professor_tarefas_v4",
+        "agendaProfessorPlanejamento_v1",
+        "agenda_professor_planos_v1"
+      ];
+
+      let encontrados = [];
+
+      chavesPossiveis.forEach(chave => {
+        try {
+          const dados = JSON.parse(localStorage.getItem(chave) || "null");
+          if (Array.isArray(dados) && dados.length > 0) {
+            encontrados.push({ chave, dados });
+          }
+        } catch (e) {}
+      });
+
+      if (encontrados.length === 0) {
+        alert("Não encontrei dados antigos neste navegador. Tente abrir o arquivo antigo da agenda, pois os dados podem estar vinculados a ele.");
+        return;
+      }
+
+      let registrosAtuais = carregarRegistros();
+      let importados = 0;
+
+      encontrados.forEach(item => {
+        item.dados.forEach(dado => {
+          if (dado.data && dado.turma && dado.disciplina && (dado.aula || dado.titulo || dado.assuntoAula)) {
+            const registro = {
+              id: dado.id || Date.now().toString() + Math.random().toString(16).slice(2),
+              data: dado.data,
+              turma: dado.turma,
+              disciplina: dado.disciplina,
+              aula: dado.aula || dado.assuntoAula || dado.titulo || "Aula",
+              conteudo: dado.conteudo || dado.descricao || "",
+              atividade: dado.atividade || "",
+              pendencias: dado.pendencias || "",
+              observacoes: dado.observacoes || "",
+              status: dado.status || "Pendente"
+            };
+
+            const jaExiste = registrosAtuais.some(r =>
+              r.data === registro.data &&
+              r.turma === registro.turma &&
+              r.disciplina === registro.disciplina &&
+              r.aula === registro.aula
+            );
+
+            if (!jaExiste) {
+              registrosAtuais.push(registro);
+              importados++;
+            }
+          }
+        });
+      });
+
+      salvarRegistros(registrosAtuais);
+      atualizarFiltroDisciplinas();
+      renderizarRegistros();
+
+      alert(importados + " registro(s) recuperado(s). Se aparecer 0, os dados já estavam importados ou estavam em outro arquivo/caminho.");
+    }
+
+    function exportarBackupJSON() {
+      const registros = carregarRegistros();
+      const blob = new Blob([JSON.stringify(registros, null, 2)], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "backup-agenda-de-aulas.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importarBackupJSON(event) {
+      const arquivo = event.target.files[0];
+      if (!arquivo) return;
+
+      const leitor = new FileReader();
+
+      leitor.onload = function(e) {
+        try {
+          const dados = JSON.parse(e.target.result);
+
+          if (!Array.isArray(dados)) {
+            alert("Arquivo inválido. O backup precisa estar em formato JSON da agenda.");
+            return;
+          }
+
+          salvarRegistros(dados);
+          atualizarFiltroDisciplinas();
+          renderizarRegistros();
+          alert("Backup importado com sucesso!");
+        } catch (erro) {
+          alert("Não foi possível importar o backup.");
+        }
+      };
+
+      leitor.readAsText(arquivo);
+      event.target.value = "";
+    }
+
 
     function exportarTXT() {
       const registros = carregarRegistros();
