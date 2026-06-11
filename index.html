@@ -122,7 +122,7 @@
 
     .toolbar {
       display: grid;
-      grid-template-columns: 1fr 190px 190px;
+      grid-template-columns: 1fr 190px 190px 160px;
       gap: 10px;
       align-items: center;
     }
@@ -284,6 +284,12 @@
         <select id="filtroDisciplina" onchange="renderizarRegistros()">
           <option value="">Selecione a disciplina</option>
         </select>
+
+        <input type="date" id="filtroData" onchange="renderizarRegistros()">
+      </div>
+
+      <div class="actions">
+        <button class="btn-secondary" type="button" onclick="limparFiltrosPesquisa()">Limpar pesquisa</button>
       </div>
 
       <div id="listaRegistros"></div>
@@ -316,6 +322,7 @@
     const busca = document.getElementById("busca");
     const filtroTurma = document.getElementById("filtroTurma");
     const filtroDisciplina = document.getElementById("filtroDisciplina");
+    const filtroData = document.getElementById("filtroData");
     const turmaSelect = document.getElementById("turma");
     const disciplinaSelect = document.getElementById("disciplina");
 
@@ -394,10 +401,11 @@
       const termo = busca.value.toLowerCase().trim();
       const turmaSelecionada = filtroTurma.value;
       const disciplinaSelecionada = filtroDisciplina.value;
+      const dataSelecionada = filtroData.value;
       let registros = carregarRegistros();
 
       if (!turmaSelecionada || !disciplinaSelecionada) {
-        lista.innerHTML = `<div class="empty">Selecione uma turma e uma disciplina para visualizar os registros.</div>`;
+        lista.innerHTML = `<div class="empty">Selecione uma turma e uma disciplina para visualizar os registros. Se quiser, também filtre pela data.</div>`;
         return;
       }
 
@@ -408,11 +416,12 @@
         const passaBusca = !termo || texto.includes(termo);
         const passaTurma = r.turma === turmaSelecionada;
         const passaDisciplina = r.disciplina === disciplinaSelecionada;
-        return passaBusca && passaTurma && passaDisciplina;
+        const passaData = !dataSelecionada || r.data === dataSelecionada;
+        return passaBusca && passaTurma && passaDisciplina && passaData;
       });
 
       if (registros.length === 0) {
-        lista.innerHTML = `<div class="empty">Nenhum registro encontrado para essa turma e disciplina.</div>`;
+        lista.innerHTML = `<div class="empty">Nenhum registro encontrado para essa turma, disciplina e data.</div>`;
         return;
       }
 
@@ -440,6 +449,14 @@
           </div>
         </article>
       `).join("");
+    }
+
+    function limparFiltrosPesquisa() {
+      busca.value = "";
+      filtroTurma.value = "";
+      filtroDisciplina.innerHTML = '<option value="">Selecione a disciplina</option>';
+      filtroData.value = "";
+      renderizarRegistros();
     }
 
     function atualizarFiltroDisciplinas() {
