@@ -149,16 +149,22 @@
     .home-grid {
       display: grid;
       grid-template-columns: repeat(4,1fr);
-      gap: 14px;
-      margin: 16px 0;
+      gap: 12px;
+      margin: 14px 0 0;
     }
 
     .home-card {
-      padding: 18px;
+      padding: 16px 12px;
       cursor: pointer;
       transition: .18s;
       position: relative;
       overflow: hidden;
+      min-height: 118px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
     }
 
     .home-card:hover {
@@ -167,26 +173,24 @@
     }
 
     .home-icon {
-      width: 52px;
-      height: 52px;
+      width: 48px;
+      height: 48px;
       display: grid;
       place-items: center;
       border-radius: 16px;
       background: var(--primary-soft);
-      font-size: 26px;
-      margin-bottom: 12px;
+      font-size: 25px;
+      margin-bottom: 10px;
     }
 
     .home-card h3 {
-      margin: 0 0 6px;
-      font-size: 17px;
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.2;
     }
 
     .home-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
+      display: none;
     }
 
     .dashboard-grid {
@@ -424,15 +428,119 @@
     }
 
     @media (max-width: 950px) {
-      .home-grid, .dashboard-grid { grid-template-columns: repeat(2,1fr); }
+      .home-grid { grid-template-columns: repeat(4,1fr); }
+      .dashboard-grid { grid-template-columns: repeat(2,1fr); }
       .grid-3 { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 700px) {
-      .grid, .home-grid, .dashboard-grid { grid-template-columns: 1fr; }
-      .actions button { width: 100%; }
-      .header-shell { padding: 22px 18px; }
-      table { font-size: 12px; }
+      header {
+        padding: 12px 10px 4px;
+      }
+
+      main {
+        padding: 12px 10px 24px;
+      }
+
+      .header-shell {
+        padding: 18px 16px;
+        border-radius: 0 0 22px 22px;
+      }
+
+      .header-badge {
+        font-size: 10px;
+        padding: 6px 10px;
+        margin-bottom: 8px;
+      }
+
+      .header-shell h1 {
+        font-size: 25px;
+      }
+
+      .header-shell p {
+        font-size: 13px;
+        margin-top: 6px;
+      }
+
+      .welcome {
+        padding: 16px;
+        border-radius: 18px;
+      }
+
+      .welcome h2 {
+        font-size: 20px;
+        margin-bottom: 6px;
+      }
+
+      .welcome p {
+        font-size: 13px;
+      }
+
+      #dbStatus {
+        margin-top: 8px !important;
+        padding: 7px 10px;
+        font-size: 12px !important;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin: 12px 0;
+      }
+
+      .stat {
+        padding: 12px;
+        border-radius: 16px;
+      }
+
+      .stat strong {
+        font-size: 23px;
+      }
+
+      .stat span {
+        font-size: 12px;
+      }
+
+      .home-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .home-card {
+        min-height: 108px;
+        padding: 14px 8px;
+        border-radius: 18px;
+      }
+
+      .home-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 23px;
+        border-radius: 14px;
+        margin-bottom: 8px;
+      }
+
+      .home-card h3 {
+        font-size: 14px;
+      }
+
+      .grid, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        padding: 16px;
+        border-radius: 18px;
+      }
+
+      .actions button {
+        width: 100%;
+      }
+
+      table {
+        font-size: 12px;
+      }
     }
   </style>
 </head>
@@ -448,8 +556,8 @@
 <main>
   <section id="telaInicio" class="screen active">
     <div class="welcome">
-      <h2>Dashboard</h2>
-      <p>Resumo geral dos registros de aula.</p>
+      <h2>Início</h2>
+      <p>Resumo e atalhos principais.</p>
       <p id="dbStatus" style="margin-top:10px;font-size:13px;color:#1e40af;font-weight:bold;">Conectando banco...</p>
     </div>
 
@@ -463,19 +571,13 @@
     <div class="home-grid">
       <div class="home-card" onclick="abrirTela('telaRegistro')"><div class="home-icon">➕</div><h3>Registrar</h3><p>Cadastrar aula, conteúdo e observações.</p></div>
       <div class="home-card" onclick="abrirTela('telaPesquisa')"><div class="home-icon">🔎</div><h3>Pesquisar</h3><p>Buscar aulas registradas.</p></div>
-      <div class="home-card" onclick="abrirTela('telaPlanejamento')"><div class="home-icon">🗓️</div><h3>Planejamento</h3><p>Cadastrar e vincular assuntos planejados.</p></div>
-      <div class="home-card" onclick="abrirTela('telaRelatorios')"><div class="home-icon">📊</div><h3>Relatórios</h3><p>Gerar relatório por período.</p></div>
+      <div class="home-card" onclick="abrirTela('telaPlanejamento')"><div class="home-icon">🗓️</div><h3>Planejar</h3><p>Cadastrar e vincular assuntos planejados.</p></div>
+      <div class="home-card" onclick="abrirTela('telaRelatorios')"><div class="home-icon">📊</div><h3>Relatório</h3><p>Gerar relatório por período.</p></div>
       <div class="home-card" onclick="abrirTela('telaResultados')"><div class="home-icon">📋</div><h3>Resultados</h3><p>Ver registros encontrados.</p></div>
-      <div class="home-card" onclick="registrarAulaHoje()"><div class="home-icon">⚡</div><h3>Aula de hoje</h3><p>Atalho para registrar a aula atual.</p></div>
+      <div class="home-card" onclick="registrarAulaHoje()"><div class="home-icon">⚡</div><h3>Aula hoje</h3><p>Atalho para registrar a aula atual.</p></div>
       <div class="home-card" onclick="alternarTema()"><div class="home-icon">🌙</div><h3>Tema</h3><p>Alternar modo claro/escuro.</p></div>
       <div class="home-card" onclick="abrirTela('telaBackup')"><div class="home-icon">💾</div><h3>Backup</h3><p>Exportar, importar e recuperar dados.</p></div>
-    </div>
-
-    <section class="card">
-      <h2>Último registro</h2>
-      <div id="ultimoRegistro" class="empty">Nenhum registro encontrado.</div>
-    </section>
-  </section>
+    </div>  </section>
 
   <section id="telaRegistro" class="screen">
     <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaInicio')">← Início</button></div>
@@ -1037,8 +1139,6 @@ async function atualizarDashboard(){
   $("dashPendentes").textContent = regs.filter(r=>r.status!=="Ministrada").length;
   $("dashMes").textContent = regs.filter(r=>(r.data||"").startsWith(`${ano}-${mes}`)).length;
   $("dashTotal").textContent = regs.length;
-  const ult = regs.sort((a,b)=>(b.data||"").localeCompare(a.data||""))[0];
-  $("ultimoRegistro").innerHTML = ult ? cardRegistro(ult) : "Nenhum registro encontrado.";
 }
 
 async function procurarDadosAntigos(){
