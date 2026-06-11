@@ -8,6 +8,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
+
   <style>
     :root {
       --bg: #f4f6f8;
@@ -18,6 +19,7 @@
       --primary-dark: #1d4ed8;
       --danger: #dc2626;
       --success: #16a34a;
+      --warning: #f59e0b;
       --border: #e5e7eb;
     }
 
@@ -53,6 +55,76 @@
       width: min(960px, 100%);
       margin: 0 auto;
       padding: 16px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .home-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .home-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .home-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+    }
+
+    .home-icon {
+      font-size: 38px;
+      margin-bottom: 10px;
+    }
+
+    .home-card h3 {
+      margin: 0 0 8px;
+      color: var(--primary-dark);
+      font-size: 18px;
+    }
+
+    .home-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .welcome {
+      background: linear-gradient(135deg, #eff6ff, #ffffff);
+      border: 1px solid #bfdbfe;
+      border-radius: 22px;
+      padding: 22px;
+      text-align: center;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+    }
+
+    .welcome h2 {
+      margin: 0 0 8px;
+      font-size: 23px;
+      color: var(--primary-dark);
+    }
+
+    .welcome p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
     }
 
     .card {
@@ -119,13 +191,7 @@
     .btn-secondary { background: #e5e7eb; color: #111827; }
     .btn-danger { background: var(--danger); color: white; }
     .btn-success { background: var(--success); color: white; }
-
-    .toolbar {
-      display: grid;
-      grid-template-columns: 1fr 190px 190px 160px;
-      gap: 10px;
-      align-items: center;
-    }
+    .btn-warning { background: var(--warning); color: #111827; }
 
     .registro {
       border: 1px solid var(--border);
@@ -160,7 +226,10 @@
     .empty {
       text-align: center;
       color: var(--muted);
-      padding: 20px 10px;
+      padding: 30px 10px;
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+      background: #fafafa;
     }
 
     .tag {
@@ -185,6 +254,26 @@
       color: #92400e;
     }
 
+    .status-box {
+      background: #eff6ff;
+      color: #1e3a8a;
+      border: 1px solid #bfdbfe;
+      border-radius: 14px;
+      padding: 12px;
+      line-height: 1.5;
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+
+    .top-back {
+      margin-bottom: 14px;
+    }
+
+    .top-back button {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
     footer {
       text-align: center;
       color: var(--muted);
@@ -193,34 +282,139 @@
     }
 
     @media (max-width: 700px) {
-      .grid, .toolbar { grid-template-columns: 1fr; }
+      .grid, .home-grid { grid-template-columns: 1fr; }
       header h1 { font-size: 22px; }
       .actions button { width: 100%; }
     }
   </style>
 </head>
+
 <body>
   <header>
     <h1>Agenda de Aulas</h1>
-    <p>Registre conteúdos ministrados, atividades feitas e pendências por turma.</p>
+    <p>Registre, pesquise e acompanhe as aulas ministradas por turma.</p>
   </header>
 
   <main>
-    <section class="card">
-      <h2>Novo registro</h2>
+    <section id="telaInicio" class="screen active">
+      <div class="welcome">
+        <h2>Bem-vindo à sua Agenda de Aulas</h2>
+        <p>Escolha uma opção abaixo para registrar aulas, pesquisar conteúdos, ver resultados ou fazer backup dos seus dados.</p>
+      </div>
 
-      <form id="formAgenda">
-        <input type="hidden" id="editId">
+      <div class="home-grid">
+        <div class="home-card" onclick="abrirTela('telaRegistro')">
+          <div class="home-icon">➕</div>
+          <h3>Novo registro</h3>
+          <p>Cadastre uma aula ministrada, atividade, pendências e observações.</p>
+        </div>
+
+        <div class="home-card" onclick="abrirTela('telaPesquisa')">
+          <div class="home-icon">🔎</div>
+          <h3>Pesquisar aulas</h3>
+          <p>Busque registros por turma, disciplina, data ou assunto.</p>
+        </div>
+
+        <div class="home-card" onclick="abrirTela('telaResultados')">
+          <div class="home-icon">📋</div>
+          <h3>Resultados</h3>
+          <p>Veja os registros encontrados após uma pesquisa.</p>
+        </div>
+
+        <div class="home-card" onclick="abrirTela('telaBackup')">
+          <div class="home-icon">💾</div>
+          <h3>Backup</h3>
+          <p>Exporte, importe ou recupere seus registros salvos.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="telaRegistro" class="screen">
+      <div class="top-back">
+        <button type="button" onclick="abrirTela('telaInicio')">← Voltar ao início</button>
+      </div>
+      <section class="card">
+        <h2>Novo registro</h2>
+
+        <form id="formAgenda">
+          <input type="hidden" id="editId">
+
+          <div class="grid">
+            <div>
+              <label for="data">Data da aula</label>
+              <input type="date" id="data" required>
+            </div>
+
+            <div>
+              <label for="turma">Turma</label>
+              <select id="turma" required onchange="atualizarDisciplinasDaTurma()">
+                <option value="">Selecione a turma</option>
+                <option value="1 ano de desenvolvimento de sistemas">1 ano de desenvolvimento de sistemas</option>
+                <option value="1 ano de programação de jogos">1 ano de programação de jogos</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="disciplina">Disciplina</label>
+              <select id="disciplina" required>
+                <option value="">Selecione primeiro a turma</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="aula">Aula/tema</label>
+              <input type="text" id="aula" placeholder="Ex.: Normalização, Game Design, IoT..." required>
+            </div>
+
+            <div class="full">
+              <label for="conteudo">Conteúdo ministrado</label>
+              <textarea id="conteudo" placeholder="Descreva o que foi explicado em sala..." required></textarea>
+            </div>
+
+            <div class="full">
+              <label for="atividade">Atividade realizada</label>
+              <textarea id="atividade" placeholder="Ex.: Exercício no caderno, prática no laboratório, revisão, avaliação..."></textarea>
+            </div>
+
+            <div class="full">
+              <label for="pendencias">Pendências / próxima aula</label>
+              <textarea id="pendencias" placeholder="Ex.: Corrigir atividade, revisar assunto, aplicar continuação..."></textarea>
+            </div>
+
+            <div class="full">
+              <label for="observacoes">Observações</label>
+              <textarea id="observacoes" placeholder="Ex.: turma participou bem, dificuldade em determinado ponto..."></textarea>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn-primary" type="submit">Salvar registro</button>
+            <button class="btn-secondary" type="button" onclick="limparFormulario()">Limpar</button>
+          </div>
+        </form>
+      </section>
+    </section>
+
+    <section id="telaPesquisa" class="screen">
+      <div class="top-back">
+        <button type="button" onclick="abrirTela('telaInicio')">← Voltar ao início</button>
+      </div>
+      <section class="card">
+        <h2>Pesquisar aulas</h2>
+
+        <div class="status-box">
+          Escolha a turma e a disciplina. Depois toque em <strong>Buscar aulas</strong>. Os registros aparecerão somente na aba <strong>Resultados</strong>.
+        </div>
 
         <div class="grid">
-          <div>
-            <label for="data">Data da aula</label>
-            <input type="date" id="data" required>
+          <div class="full">
+            <label for="busca">Pesquisar por aula, conteúdo ou atividade</label>
+            <input type="search" id="busca" placeholder="Ex.: normalização, MDA, revisão...">
           </div>
 
           <div>
-            <label for="turma">Turma</label>
-            <select id="turma" required onchange="atualizarDisciplinasDaTurma()">
+            <label for="filtroTurma">Turma</label>
+            <select id="filtroTurma" onchange="atualizarFiltroDisciplinasPorTurma()">
               <option value="">Selecione a turma</option>
               <option value="1 ano de desenvolvimento de sistemas">1 ano de desenvolvimento de sistemas</option>
               <option value="1 ano de programação de jogos">1 ano de programação de jogos</option>
@@ -228,75 +422,56 @@
           </div>
 
           <div>
-            <label for="disciplina">Disciplina</label>
-            <select id="disciplina" required>
+            <label for="filtroDisciplina">Disciplina</label>
+            <select id="filtroDisciplina">
               <option value="">Selecione primeiro a turma</option>
             </select>
           </div>
 
           <div>
-            <label for="aula">Aula/tema</label>
-            <input type="text" id="aula" placeholder="Ex.: Normalização, Game Design, IoT..." required>
-          </div>
-
-          <div class="full">
-            <label for="conteudo">Conteúdo ministrado</label>
-            <textarea id="conteudo" placeholder="Descreva o que foi explicado em sala..." required></textarea>
-          </div>
-
-          <div class="full">
-            <label for="atividade">Atividade realizada</label>
-            <textarea id="atividade" placeholder="Ex.: Exercício no caderno, prática no laboratório, revisão, avaliação..."></textarea>
-          </div>
-
-          <div class="full">
-            <label for="pendencias">Pendências / próxima aula</label>
-            <textarea id="pendencias" placeholder="Ex.: Corrigir atividade, revisar assunto, aplicar continuação..."></textarea>
-          </div>
-
-          <div class="full">
-            <label for="observacoes">Observações</label>
-            <textarea id="observacoes" placeholder="Ex.: turma participou bem, dificuldade em determinado ponto..."></textarea>
+            <label for="filtroData">Data</label>
+            <input type="date" id="filtroData">
           </div>
         </div>
 
         <div class="actions">
-          <button class="btn-primary" type="submit">Salvar registro</button>
-          <button class="btn-secondary" type="button" onclick="limparFormulario()">Limpar</button>
-          <button class="btn-success" type="button" onclick="exportarTXT()">Exportar TXT</button>
-          <button class="btn-danger" type="button" onclick="apagarTudo()">Apagar tudo</button>
+          <button class="btn-primary" type="button" onclick="buscarRegistros()">Buscar aulas</button>
+          <button class="btn-secondary" type="button" onclick="limparFiltrosPesquisa()">Limpar pesquisa</button>
         </div>
-      </form>
+      </section>
     </section>
 
-    <section class="card">
-      <h2>Registros salvos</h2>
-
-      <div class="toolbar">
-        <input type="search" id="busca" placeholder="Pesquisar por aula, conteúdo ou atividade..." oninput="renderizarRegistros()">
-
-        <select id="filtroTurma" onchange="atualizarFiltroDisciplinasPorTurma(); renderizarRegistros();">
-          <option value="">Selecione a turma</option>
-          <option value="1 ano de desenvolvimento de sistemas">1 ano de desenvolvimento de sistemas</option>
-          <option value="1 ano de programação de jogos">1 ano de programação de jogos</option>
-        </select>
-
-        <select id="filtroDisciplina" onchange="renderizarRegistros()">
-          <option value="">Selecione a disciplina</option>
-        </select>
-
-        <input type="date" id="filtroData" onchange="renderizarRegistros()">
+    <section id="telaResultados" class="screen">
+      <div class="top-back">
+        <button type="button" onclick="abrirTela('telaInicio')">← Voltar ao início</button>
       </div>
+      <section class="card">
+        <h2>Resultados</h2>
+        <div id="resumoResultados" class="status-box">Faça uma pesquisa para visualizar os registros aqui.</div>
+        <div id="listaRegistros"></div>
+      </section>
+    </section>
 
-      <div class="actions">
-        <button class="btn-secondary" type="button" onclick="limparFiltrosPesquisa()">Limpar pesquisa</button>
-        <button class="btn-success" type="button" onclick="procurarDadosAntigos()">Procurar dados antigos</button>
-        <button class="btn-secondary" type="button" onclick="exportarBackupJSON()">Exportar backup JSON</button>
-        <button class="btn-secondary" type="button" onclick="document.getElementById('arquivoBackupJSON').click()">Importar backup JSON</button>
-        <input type="file" id="arquivoBackupJSON" accept=".json" style="display:none" onchange="importarBackupJSON(event)">
+    <section id="telaBackup" class="screen">
+      <div class="top-back">
+        <button type="button" onclick="abrirTela('telaInicio')">← Voltar ao início</button>
       </div>
+      <section class="card">
+        <h2>Backup e recuperação</h2>
 
-      <div id="listaRegistros"></div>
+        <div class="status-box">
+          Use o backup para não perder os registros quando atualizar o app ou trocar de arquivo.
+        </div>
+
+        <div class="actions">
+          <button class="btn-success" type="button" onclick="procurarDadosAntigos()">Procurar dados antigos</button>
+          <button class="btn-secondary" type="button" onclick="exportarTXT()">Exportar TXT</button>
+          <button class="btn-secondary" type="button" onclick="exportarBackupJSON()">Exportar backup JSON</button>
+          <button class="btn-secondary" type="button" onclick="document.getElementById('arquivoBackupJSON').click()">Importar backup JSON</button>
+          <button class="btn-danger" type="button" onclick="apagarTudo()">Apagar tudo</button>
+          <input type="file" id="arquivoBackupJSON" accept=".json" style="display:none" onchange="importarBackupJSON(event)">
+        </div>
+      </section>
     </section>
   </main>
 
@@ -329,8 +504,21 @@
     const filtroData = document.getElementById("filtroData");
     const turmaSelect = document.getElementById("turma");
     const disciplinaSelect = document.getElementById("disciplina");
+    const resumoResultados = document.getElementById("resumoResultados");
 
     document.getElementById("data").valueAsDate = new Date();
+
+    let ultimaBusca = [];
+
+    function abrirTela(id) {
+      document.querySelectorAll(".screen").forEach(tela => tela.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function abrirResultados() {
+      abrirTela("telaResultados");
+    }
 
     function atualizarDisciplinasDaTurma(valorSelecionado = "") {
       const turma = turmaSelect.value;
@@ -343,6 +531,15 @@
       if (valorSelecionado) {
         disciplinaSelect.value = valorSelecionado;
       }
+    }
+
+    function atualizarFiltroDisciplinasPorTurma() {
+      const turmaSelecionada = filtroTurma.value;
+      const disciplinas = disciplinasPorTurma[turmaSelecionada] || [];
+
+      filtroDisciplina.innerHTML = disciplinas.length
+        ? '<option value="">Selecione a disciplina</option>' + disciplinas.map(d => `<option value="${escapeAttr(d)}">${escapeHTML(d)}</option>`).join("")
+        : '<option value="">Selecione primeiro a turma</option>';
     }
 
     function carregarRegistros() {
@@ -382,8 +579,6 @@
 
       salvarRegistros(registros);
       limparFormulario();
-      atualizarFiltroDisciplinas();
-      renderizarRegistros();
       alert("Registro salvo com sucesso!");
     });
 
@@ -401,17 +596,18 @@
       return `${dia}/${mes}/${ano}`;
     }
 
-    function renderizarRegistros() {
+    function buscarRegistros() {
       const termo = busca.value.toLowerCase().trim();
       const turmaSelecionada = filtroTurma.value;
       const disciplinaSelecionada = filtroDisciplina.value;
       const dataSelecionada = filtroData.value;
-      let registros = carregarRegistros();
 
       if (!turmaSelecionada || !disciplinaSelecionada) {
-        lista.innerHTML = `<div class="empty">Selecione uma turma e uma disciplina para visualizar os registros. Se quiser, também filtre pela data.</div>`;
+        alert("Selecione uma turma e uma disciplina para pesquisar.");
         return;
       }
+
+      let registros = carregarRegistros();
 
       registros.sort((a, b) => (b.data || "").localeCompare(a.data || ""));
 
@@ -424,12 +620,21 @@
         return passaBusca && passaTurma && passaDisciplina && passaData;
       });
 
-      if (registros.length === 0) {
-        lista.innerHTML = `<div class="empty">Nenhum registro encontrado para essa turma, disciplina e data.</div>`;
+      ultimaBusca = registros;
+      renderizarResultados();
+      abrirResultados();
+    }
+
+    function renderizarResultados() {
+      if (ultimaBusca.length === 0) {
+        resumoResultados.textContent = "Nenhum registro encontrado para essa pesquisa.";
+        lista.innerHTML = `<div class="empty">Nenhum registro encontrado.</div>`;
         return;
       }
 
-      lista.innerHTML = registros.map(r => `
+      resumoResultados.textContent = `${ultimaBusca.length} registro(s) encontrado(s).`;
+
+      lista.innerHTML = ultimaBusca.map(r => `
         <article class="registro ${r.status === "Ministrada" ? "ministrada" : ""}">
           <div class="meta">${formatarData(r.data)}</div>
           <h3>${escapeHTML(r.aula)}</h3>
@@ -455,33 +660,6 @@
       `).join("");
     }
 
-    function limparFiltrosPesquisa() {
-      busca.value = "";
-      filtroTurma.value = "";
-      filtroDisciplina.innerHTML = '<option value="">Selecione a disciplina</option>';
-      filtroData.value = "";
-      renderizarRegistros();
-    }
-
-    function atualizarFiltroDisciplinas() {
-      atualizarFiltroDisciplinasPorTurma();
-    }
-
-    function atualizarFiltroDisciplinasPorTurma() {
-      const turmaSelecionada = filtroTurma.value;
-      const disciplinas = turmaSelecionada ? (disciplinasPorTurma[turmaSelecionada] || []) : [];
-
-      const valorAtual = filtroDisciplina.value;
-
-      filtroDisciplina.innerHTML = disciplinas.length
-        ? '<option value="">Selecione a disciplina</option>' + disciplinas.map(d => `<option value="${escapeAttr(d)}">${escapeHTML(d)}</option>`).join("")
-        : '<option value="">Selecione primeiro a turma</option>';
-
-      if (disciplinas.includes(valorAtual)) {
-        filtroDisciplina.value = valorAtual;
-      }
-    }
-
     function alternarStatusAula(id) {
       let registros = carregarRegistros();
 
@@ -493,7 +671,15 @@
       });
 
       salvarRegistros(registros);
-      renderizarRegistros();
+
+      ultimaBusca = ultimaBusca.map(item => {
+        if (item.id === id) {
+          item.status = item.status === "Ministrada" ? "Pendente" : "Ministrada";
+        }
+        return item;
+      });
+
+      renderizarResultados();
     }
 
     function editarRegistro(id) {
@@ -512,24 +698,34 @@
       document.getElementById("observacoes").value = r.observacoes;
 
       form.querySelector("button[type='submit']").textContent = "Atualizar registro";
+      abrirTela("telaRegistro");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function excluirRegistro(id) {
       if (!confirm("Deseja excluir este registro?")) return;
+
       const registros = carregarRegistros().filter(item => item.id !== id);
       salvarRegistros(registros);
-      atualizarFiltroDisciplinas();
-      renderizarRegistros();
+
+      ultimaBusca = ultimaBusca.filter(item => item.id !== id);
+      renderizarResultados();
+    }
+
+    function limparFiltrosPesquisa() {
+      busca.value = "";
+      filtroTurma.value = "";
+      filtroDisciplina.innerHTML = '<option value="">Selecione primeiro a turma</option>';
+      filtroData.value = "";
     }
 
     function apagarTudo() {
       if (!confirm("Tem certeza que deseja apagar todos os registros?")) return;
       localStorage.removeItem(STORAGE_KEY);
-      atualizarFiltroDisciplinas();
-      renderizarRegistros();
+      ultimaBusca = [];
+      renderizarResultados();
+      alert("Todos os registros foram apagados.");
     }
-
 
     function procurarDadosAntigos() {
       const chavesPossiveis = [
@@ -554,7 +750,7 @@
       });
 
       if (encontrados.length === 0) {
-        alert("Não encontrei dados antigos neste navegador. Tente abrir o arquivo antigo da agenda, pois os dados podem estar vinculados a ele.");
+        alert("Não encontrei dados antigos neste navegador. Tente abrir o arquivo antigo da agenda.");
         return;
       }
 
@@ -593,10 +789,7 @@
       });
 
       salvarRegistros(registrosAtuais);
-      atualizarFiltroDisciplinas();
-      renderizarRegistros();
-
-      alert(importados + " registro(s) recuperado(s). Se aparecer 0, os dados já estavam importados ou estavam em outro arquivo/caminho.");
+      alert(importados + " registro(s) recuperado(s).");
     }
 
     function exportarBackupJSON() {
@@ -626,8 +819,8 @@
           }
 
           salvarRegistros(dados);
-          atualizarFiltroDisciplinas();
-          renderizarRegistros();
+          ultimaBusca = [];
+          renderizarResultados();
           alert("Backup importado com sucesso!");
         } catch (erro) {
           alert("Não foi possível importar o backup.");
@@ -637,7 +830,6 @@
       leitor.readAsText(arquivo);
       event.target.value = "";
     }
-
 
     function exportarTXT() {
       const registros = carregarRegistros();
@@ -654,6 +846,7 @@ DATA: ${formatarData(r.data)}
 TURMA: ${r.turma}
 DISCIPLINA: ${r.disciplina}
 AULA/TEMA: ${r.aula}
+STATUS: ${r.status || "Pendente"}
 CONTEÚDO MINISTRADO: ${r.conteudo}
 ATIVIDADE REALIZADA: ${r.atividade || "-"}
 PENDÊNCIAS / PRÓXIMA AULA: ${r.pendencias || "-"}
@@ -683,9 +876,9 @@ OBSERVAÇÕES: ${r.observacoes || "-"}
       return escapeHTML(text).replaceAll('"', "&quot;");
     }
 
-    atualizarFiltroDisciplinas();
-    renderizarRegistros();
+    renderizarResultados();
   </script>
+
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
