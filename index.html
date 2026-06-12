@@ -1785,11 +1785,6 @@ body.dark
           <div><strong>Sincronização</strong><span>Puxar dados de outro dispositivo usando Google Sheets.</span></div>
           <button class="btn-primary" type="button" onclick="abrirTela('telaSincronizacao')">Abrir</button>
         </div>
-
-        <div class="settings-item">
-          <div><strong>Recuperar dados locais</strong><span>Tenta localizar registros salvos neste navegador.</span></div>
-          <button class="btn-warning" type="button" onclick="recuperarDadosLocaisEmergencia()">Recuperar</button>
-        </div>
         <div class="settings-item">
           <div><strong>Backup</strong><span>Exportar, importar ou recuperar dados.</span></div>
           <button class="btn-primary" type="button" onclick="abrirTela('telaBackup')">Abrir</button>
@@ -2013,51 +2008,6 @@ window.addEventListener("load", () => {
     if (e.key === "Enter") entrarNoApp();
   });
 });
-
-async function recuperarDadosLocaisEmergencia() {
-  try {
-    let encontrados = 0;
-
-    // 1) Recuperar formato antigo localStorage
-    const chavesPossiveis = [
-      "agenda_aulas_professor_v2",
-      "registros",
-      "aulas",
-      "agenda_registros"
-    ];
-
-    for (const chave of chavesPossiveis) {
-      const bruto = localStorage.getItem(chave);
-      if (!bruto) continue;
-
-      try {
-        const dados = JSON.parse(bruto);
-        const lista = Array.isArray(dados) ? dados : (dados.registros || dados.aulas || []);
-        if (Array.isArray(lista)) {
-          for (const r of lista) {
-            if (!r.id) r.id = Date.now().toString() + Math.random().toString(16).slice(2);
-            if (!r.status) r.status = "Pendente";
-            await put(STORE_REGISTROS, r);
-            encontrados++;
-          }
-        }
-      } catch(e) {}
-    }
-
-    // 2) Atualizar tela
-    await atualizarDashboard();
-    renderizarResultados();
-
-    if (encontrados > 0) {
-      alert("Recuperação concluída. Registros recuperados: " + encontrados);
-    } else {
-      alert("Não encontrei registros antigos no armazenamento local deste navegador. Se eles estavam na planilha, use Config. > Sincronização > Puxar dados.");
-    }
-  } catch (e) {
-    alert("Erro na recuperação local: " + e.message);
-  }
-}
-
 </script>
 
 <script>
@@ -3006,10 +2956,10 @@ async function gerarRelatorio(){
   $("relConteudo").innerHTML = regs.length ? `
     <div class="report-header">
       <h3>Relatório de Aulas</h3>
-      <p><strong>Escola:</strong> ${esc(((typeof getPerfil === "function") ? getPerfil() : {}).escola || "Não informado")}<br>
-      <strong>Professor:</strong> ${esc(((typeof getPerfil === "function") ? getPerfil() : {}).professor || "Não informado")}<br>
-      <strong>Ano letivo:</strong> ${esc(((typeof getPerfil === "function") ? getPerfil() : {}).ano || "Não informado")}<br>
-      <strong>Cidade:</strong> ${esc(((typeof getPerfil === "function") ? getPerfil() : {}).cidade || "Não informado")}<br>
+      <p><strong>Escola:</strong> ${esc(getPerfil().escola || "Não informado")}<br>
+      <strong>Professor:</strong> ${esc(getPerfil().professor || "Não informado")}<br>
+      <strong>Ano letivo:</strong> ${esc(getPerfil().ano || "Não informado")}<br>
+      <strong>Cidade:</strong> ${esc(getPerfil().cidade || "Não informado")}<br>
       <strong>Turma:</strong> ${esc(turma || "Todas")}<br>
       <strong>Disciplina:</strong> ${esc(disciplina || "Todas")}<br>
       <strong>Período:</strong> ${de ? formatarData(de) : "início"} até ${ate ? formatarData(ate) : "fim"}</p>
@@ -3026,7 +2976,7 @@ async function gerarRelatorio(){
     <p><strong>Conteúdo:</strong> ${esc(r.conteudo)||"-"}</p>
     <p><strong>Atividade:</strong> ${esc(r.atividade)||"-"}</p>
     <p><strong>Pendências:</strong> ${esc(r.pendencias)||"-"}</p>
-  </article>`).join("") + `<div class="report-signature"><p>________________________________________</p><p>${esc(((typeof getPerfil === "function") ? getPerfil() : {}).professor || "Professor")}</p></div>` : '<div class="empty">Nenhum registro para o relatório.</div>';
+  </article>`).join("") + `<div class="report-signature"><p>________________________________________</p><p>${esc(getPerfil().professor || "Professor")}</p></div>` : '<div class="empty">Nenhum registro para o relatório.</div>';
 }
 
 function exportarRelatorioPDF(){
@@ -3390,6 +3340,38 @@ function forceDockLayout() {
   window.addEventListener('resize', forceDockLayout);
   setTimeout(forceDockLayout, 50);
   setTimeout(forceDockLayout, 300);
+})();
+</script>
+
+
+<script>
+(function corrigirBotoesMenuInferior(){
+  function ligar(idBtn, idTela){
+    var btn = document.getElementById(idBtn);
+    if (!btn) return;
+    btn.onclick = function(ev){
+      ev.preventDefault();
+      if (typeof abrirTela === "function") {
+        abrirTela(idTela);
+      } else {
+        alert("Erro: função abrirTela não carregou.");
+      }
+    };
+  }
+
+  function aplicar(){
+    ligar("navInicio", "telaInicio");
+    ligar("navRegistro", "telaRegistro");
+    ligar("navPesquisa", "telaPesquisa");
+    ligar("navPlanejar", "telaPlanejamento");
+    ligar("navRelatorio", "telaRelatorios");
+    ligar("navConfig", "telaConfiguracoes");
+    if (typeof forceDockLayout === "function") forceDockLayout();
+  }
+
+  window.addEventListener("load", aplicar);
+  setTimeout(aplicar, 300);
+  setTimeout(aplicar, 1000);
 })();
 </script>
 
