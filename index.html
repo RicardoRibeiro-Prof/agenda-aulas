@@ -1826,7 +1826,10 @@ body.dark
 
       <div id="syncStatus" class="status-box" style="margin-top:14px;">Sincronização não configurada.</div>
       <div class="status-box" style="margin-top:10px;">
-        <strong>Atenção:</strong> em aparelho novo ou vazio, use primeiro <strong>Puxar dados</strong>. O envio vazio agora fica bloqueado para proteger a planilha.
+        <strong>Automação ativa:</strong> ao abrir o app, ele pergunta se deseja puxar dados da nuvem. Ao salvar aula, planejamento ou perfil, ele envia em segundo plano sem mostrar alerta.
+      </div>
+      <div class="actions">
+        <button class="btn-secondary" type="button" onclick="ativarPerguntaAoAbrir()">Perguntar ao abrir novamente</button>
       </div>
     </section>
   </section>
@@ -2024,6 +2027,8 @@ const LAST_BACKUP_KEY = "agenda_ultimo_backup_v1";
 
 const SYNC_URL_KEY = "agenda_sync_url_v1";
 const DEVICE_ID_KEY = "agenda_device_id_v1";
+const AUTO_PULL_ASKED_KEY = "agenda_auto_pull_asked_v1";
+const SYNC_SILENT_KEY = "agenda_sync_silent_v1";
 
 function getDeviceId() {
   let id = localStorage.getItem(DEVICE_ID_KEY);
@@ -2204,27 +2209,29 @@ async function obterResumoNuvem() {
   }
 }
 
-async function enviarDadosNuvem() {
+async function enviarDadosNuvem(silencioso = false) {
   try {
     const registros = await getAll(STORE_REGISTROS);
     const planejamentos = await getAll(STORE_PLANOS);
     const perfil = getPerfil();
 
     if (registros.length === 0 && planejamentos.length === 0) {
-      alert("Este dispositivo está vazio. Para não apagar os dados da nuvem, o envio foi bloqueado. Use 'Puxar dados' primeiro.");
+      if (!silencioso) {
+        alert("Este dispositivo está vazio. Para não apagar os dados da nuvem, o envio foi bloqueado. Use 'Puxar dados' primeiro.");
+      }
       atualizarStatusSync("Envio bloqueado: dispositivo vazio.");
-      return;
+      return false;
     }
 
     const resumoNuvem = await obterResumoNuvem();
 
-    if (resumoNuvem && resumoNuvem.registros > registros.length) {
+    if (!silencioso && resumoNuvem && resumoNuvem.registros > registros.length) {
       const continuar = confirm(
         `A nuvem possui ${resumoNuvem.registros} registro(s), mas este dispositivo possui ${registros.length}.\\n\\nEnviar agora pode substituir dados da nuvem por uma versão menor.\\n\\nDeseja enviar mesmo assim?`
       );
       if (!continuar) {
         atualizarStatusSync("Envio cancelado para proteger os dados da nuvem.");
-        return;
+        return false;
       }
     }
 
@@ -2237,12 +2244,22 @@ async function enviarDadosNuvem() {
       data: { registros, planejamentos, perfil }
     });
 
-    atualizarStatusSync(`Dados enviados: ${registros.length} registro(s) e ${planejamentos.length} planejamento(s).`);
+    atualizarStatusSync(`Sincronizado: ${registros.length} registro(s) e ${planejamentos.length} planejamento(s) enviados.`);
     atualizarCardNuvemInicio();
-    alert("Dados enviados para a nuvem.");
+
+    if (!silencioso) {
+      alert("Dados enviados para a nuvem.");
+    }
+
+    return true;
   } catch (erro) {
     atualizarStatusSync("Erro ao enviar dados.");
-    alert("Erro ao enviar dados: " + erro.message);
+    if (!silencioso) {
+      alert("Erro ao enviar dados: " + erro.message);
+    } else {
+      console.warn("Erro ao enviar em segundo plano:", erro);
+    }
+    return false;
   }
 }
 async function baixarDadosNuvem(modoAutomatico = false) {
@@ -2321,7 +2338,7 @@ async function sincronizarTudo() {
   if (registrosLocais.length === 0 && planosLocais.length === 0) {
     await baixarDadosNuvem(false);
   } else {
-    await enviarDadosNuvem();
+    await enviarDadosNuvem(false);
   }
 }
 
@@ -2337,7 +2354,7 @@ async function sincronizarAoSalvar() {
       return;
     }
 
-    await enviarDadosNuvem();
+    await enviarDadosNuvem(true);
   } catch (e) {
     console.warn("Sincronização automática falhou:", e);
   }
@@ -2354,163 +2371,31 @@ async function sincronizarAoAbrir() {
     const registrosLocais = await getAll(STORE_REGISTROS);
     const planosLocais = await getAll(STORE_PLANOS);
 
+    const devePerguntar = sessionStorage.getItem(AUTO_PULL_ASKED_KEY) !== "sim";
+    sessionStorage.setItem(AUTO_PULL_ASKED_KEY, "sim");
+
     if (registrosLocais.length === 0 && planosLocais.length === 0) {
       atualizarStatusSync("Aparelho vazio. Puxando dados da nuvem...");
       await baixarDadosNuvem(true);
+      return;
+    }
+
+    if (devePerguntar) {
+      setTimeout(async () => {
+        const puxar = confirm("Deseja puxar os dados mais recentes da nuvem agora?");
+        if (puxar) {
+          await baixarDadosNuvem(false);
+        }
+      }, 700);
     }
   } catch (e) {
     console.warn("Status de sincronização indisponível:", e);
   }
 }
 
-
-function getPerfil() {
-  try {
-    return JSON.parse(localStorage.getItem(PERFIL_KEY) || "{}");
-  } catch (e) {
-    return {};
-  }
-}
-
-function carregarPerfil() {
-  const p = getPerfil();
-  if ($("perfilProfessor")) $("perfilProfessor").value = p.professor || "";
-  if ($("perfilEscola")) $("perfilEscola").value = p.escola || "";
-  if ($("perfilAno")) $("perfilAno").value = p.ano || "";
-  if ($("perfilCidade")) $("perfilCidade").value = p.cidade || "";
-}
-
-function salvarPerfil() {
-  const perfil = {
-    professor: $("perfilProfessor").value.trim(),
-    escola: $("perfilEscola").value.trim(),
-    ano: $("perfilAno").value.trim(),
-    cidade: $("perfilCidade").value.trim()
-  };
-  localStorage.setItem(PERFIL_KEY, JSON.stringify(perfil));
-  sincronizarAoSalvar();
-  alert("Perfil salvo com sucesso.");
-}
-
-async function configurarPerguntaSeguranca() {
-  const pergunta = prompt("Digite uma pergunta de segurança. Ex.: Nome da escola?");
-  if (!pergunta) return;
-
-  const resposta = prompt("Digite a resposta secreta:");
-  if (!resposta) return;
-
-  const hash = await gerarHashLogin(resposta.trim().toLowerCase());
-  localStorage.setItem(SECURITY_QUESTION_KEY, pergunta.trim());
-  localStorage.setItem(SECURITY_ANSWER_HASH_KEY, hash);
-  alert("Pergunta de segurança configurada.");
-}
-
-async function esqueciSenha() {
-  if (!loginConfigurado()) {
-    alert("Ainda não existe login cadastrado.");
-    return;
-  }
-
-  const pergunta = localStorage.getItem(SECURITY_QUESTION_KEY);
-  const respostaHash = localStorage.getItem(SECURITY_ANSWER_HASH_KEY);
-
-  if (!pergunta || !respostaHash) {
-    alert("Nenhuma pergunta de segurança foi configurada. Entre no app e configure em Configurações.");
-    return;
-  }
-
-  const resposta = prompt(pergunta);
-  if (!resposta) return;
-
-  const hash = await gerarHashLogin(resposta.trim().toLowerCase());
-
-  if (hash !== respostaHash) {
-    alert("Resposta incorreta.");
-    return;
-  }
-
-  const novoUsuario = prompt("Digite o novo usuário:");
-  if (!novoUsuario) return;
-
-  const novaSenha = prompt("Digite a nova senha:");
-  if (!novaSenha) return;
-
-  const novoHash = await gerarHashLogin(novoUsuario.trim() + "::" + novaSenha);
-  localStorage.setItem(LOGIN_USER_KEY, novoUsuario.trim());
-  localStorage.setItem(LOGIN_HASH_KEY, novoHash);
-  alert("Login redefinido com sucesso.");
-}
-
-async function usarPlanoNoRegistro(id) {
-  const p = await getOne(STORE_PLANOS, id);
-  if (!p) return;
-
-  $("editId").value = "";
-  $("data").value = hojeISO();
-  $("aulaNumero").value = p.aulaNumero || "";
-  $("turma").value = p.turma || "";
-  atualizarDisciplinasDaTurma(p.disciplina || "");
-  await carregarPlanosParaRegistro();
-  $("planoRegistro").value = p.id;
-  $("aula").value = p.assunto || "";
-  $("conteudo").value = p.conteudo || "";
-  $("atividade").value = p.atividade || "";
-  $("pendencias").value = p.pendencias || "";
-
-  abrirTela("telaRegistro");
-}
-
-async function duplicarPlano(id) {
-  const p = await getOne(STORE_PLANOS, id);
-  if (!p) return;
-
-  const novo = {
-    ...p,
-    id: Date.now().toString(),
-    usado: false,
-    assunto: (p.assunto || "") + " (cópia)"
-  };
-
-  await put(STORE_PLANOS, novo);
-  alert("Planejamento duplicado.");
-  buscarPlanos();
-}
-
-async function alternarPlanoUsado(id) {
-  const p = await getOne(STORE_PLANOS, id);
-  if (!p) return;
-
-  p.usado = !p.usado;
-  await put(STORE_PLANOS, p);
-  buscarPlanos();
-}
-
-async function gerarHistoricoMensal() {
-  const mes = $("histMes").value;
-  if (!mes) {
-    alert("Selecione um mês.");
-    return;
-  }
-
-  const regs = (await getAll(STORE_REGISTROS)).filter(r => (r.data || "").startsWith(mes));
-  const total = regs.length;
-  const ministradas = regs.filter(r => r.status === "Ministrada").length;
-  const pendentes = regs.filter(r => r.status !== "Ministrada").length;
-
-  const porDisciplina = {};
-  regs.forEach(r => {
-    const chave = r.disciplina || "Sem disciplina";
-    porDisciplina[chave] = (porDisciplina[chave] || 0) + 1;
-  });
-
-  $("histResumo").innerHTML = `<strong>${total}</strong> registro(s) no mês. Ministradas: <strong>${ministradas}</strong>. Pendentes: <strong>${pendentes}</strong>.`;
-
-  const itens = Object.entries(porDisciplina)
-    .sort((a,b)=>b[1]-a[1])
-    .map(([disciplina, qtd]) => `<div class="history-item"><strong>${esc(disciplina)}</strong>${qtd} aula(s) registrada(s)</div>`)
-    .join("");
-
-  $("histConteudo").innerHTML = itens || '<div class="empty">Nenhum registro neste mês.</div>';
+function ativarPerguntaAoAbrir() {
+  sessionStorage.removeItem(AUTO_PULL_ASKED_KEY);
+  alert("Pronto. Na próxima abertura do app, ele perguntará se deseja puxar os dados da nuvem.");
 }
 
 function verificarLembreteBackup() {
