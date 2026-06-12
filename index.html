@@ -148,18 +148,16 @@
 
     .home-grid {
       display: grid;
-      grid-template-columns: repeat(4,1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
       margin: 14px 0 0;
     }
 
     .home-card {
-      padding: 16px 12px;
+      padding: 18px 10px;
       cursor: pointer;
       transition: .18s;
-      position: relative;
-      overflow: hidden;
-      min-height: 118px;
+      min-height: 112px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -415,6 +413,455 @@
       padding: 12px 12px 28px;
     }
 
+
+    .quick-search {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .quick-search input {
+      flex: 1;
+    }
+
+    .form-section {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 14px;
+      background: rgba(255,255,255,.42);
+    }
+
+    body.dark .form-section {
+      background: rgba(15,23,42,.22);
+    }
+
+    .form-section-title {
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--text);
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .settings-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .settings-item {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--card);
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .settings-item strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 3px;
+    }
+
+    .settings-item span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+body.dark
+body.dark
+.report-header {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 12px;
+      background: rgba(37,99,235,.06);
+    }
+
+    .report-header h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .report-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .report-summary div {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      text-align: center;
+      background: var(--card);
+    }
+
+    .report-summary strong {
+      display: block;
+      font-size: 20px;
+    }
+
+
+    .dashboard-compact {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 12px 0 14px;
+    }
+
+    .dashboard-compact .stat {
+      padding: 12px 8px;
+      border-radius: 16px;
+      text-align: center;
+    }
+
+    .dashboard-compact .stat strong {
+      font-size: 22px;
+      margin-bottom: 2px;
+    }
+
+    .dashboard-compact .stat span {
+      font-size: 11px;
+      line-height: 1.15;
+    }
+
+    .home-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .home-title-row h2 {
+      margin: 0;
+    }
+
+    .mini-config {
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 13px;
+      box-shadow: none;
+    }
+
+    .section-hint {
+      margin: -4px 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .quick-actions button {
+      width: 100%;
+      padding: 11px 10px;
+      border-radius: 14px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 700px) {
+      .dashboard-compact {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 7px;
+      }
+
+      .dashboard-compact .stat {
+        padding: 10px 4px;
+      }
+
+      .dashboard-compact .stat strong {
+        font-size: 20px;
+      }
+
+      .dashboard-compact .stat span {
+        font-size: 10px;
+      }
+
+      .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .quick-actions button {
+        font-size: 12px;
+        padding: 10px 8px;
+      }
+    }
+
+
+    /* Versão limpa para celular */
+    .welcome {
+      padding: 18px;
+      text-align: center;
+    }
+
+    .welcome h2 {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+
+    .welcome p {
+      font-size: 13px;
+    }
+
+    .clean-home {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .clean-home .home-card {
+      min-height: 104px;
+      padding: 14px 8px;
+      border-radius: 18px;
+      box-shadow: 0 6px 16px rgba(15,23,42,.06);
+    }
+
+    .clean-home .home-icon {
+      width: 42px;
+      height: 42px;
+      font-size: 22px;
+      margin-bottom: 8px;
+      border-radius: 14px;
+    }
+
+    .clean-home .home-card h3 {
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .form-section {
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 16px;
+    }
+
+    .form-section-title {
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .card {
+      box-shadow: 0 6px 18px rgba(15,23,42,.06);
+    }
+
+    .dashboard-grid,
+    .dashboard-compact,
+    .quick-search,
+    .quick-actions,
+    .home-title-row {
+      display: none !important;
+    }
+
+    @media (max-width: 700px) {
+      .clean-home {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+
+      main {
+        padding: 12px 10px 24px;
+      }
+
+      .header-shell p {
+        display: none;
+      }
+    }
+
+
+    /* Dashboard + botões flutuantes no rodapé */
+    main {
+      padding-bottom: 96px !important;
+    }
+
+    .dashboard-footer-mode {
+      display: grid !important;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 14px 0 0;
+    }
+
+    .dashboard-footer-mode .stat {
+      display: block;
+      padding: 14px 10px;
+      border-radius: 18px;
+      text-align: center;
+      box-shadow: 0 6px 16px rgba(15,23,42,.06);
+    }
+
+    .dashboard-footer-mode .stat strong {
+      font-size: 26px;
+      margin-bottom: 2px;
+    }
+
+    .dashboard-footer-mode .stat span {
+      font-size: 12px;
+    }
+
+    .bottom-dock {
+      position: fixed;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      z-index: 50;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 5px;
+      padding: 7px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 0 12px 30px rgba(15,23,42,.18);
+      backdrop-filter: blur(12px);
+    }
+
+    body.dark .bottom-dock {
+      background: rgba(15,23,42,.92);
+    }
+
+    .bottom-dock button {
+      padding: 7px 2px;
+      border-radius: 14px;
+      background: transparent;
+      color: var(--muted);
+      box-shadow: none;
+      font-size: 10px;
+      line-height: 1.1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .bottom-dock button span {
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .bottom-dock button.active {
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+    }
+
+    body.dark .bottom-dock button.active {
+      color: #bfdbfe;
+    }
+
+    @media (max-width: 700px) {
+      .bottom-dock {
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        gap: 4px;
+        padding: 6px;
+      }
+
+      .bottom-dock button {
+        font-size: 9px;
+        padding: 7px 1px;
+      }
+
+      .bottom-dock button span {
+        font-size: 16px;
+      }
+
+      .dashboard-footer-mode {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+    }
+
+
+    /* Botões realmente flutuantes no rodapé */
+    main {
+      padding-bottom: 118px !important;
+    }
+
+    .bottom-dock {
+      position: fixed;
+      left: 8px;
+      right: 8px;
+      bottom: 10px;
+      z-index: 9999;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 7px;
+      pointer-events: auto;
+    }
+
+    .bottom-dock button {
+      min-height: 58px;
+      padding: 6px 2px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.96);
+      color: #334155;
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-weight: 800;
+    }
+
+    body.dark .bottom-dock button {
+      background: rgba(30, 41, 59, 0.96);
+      color: #e5e7eb;
+      border-color: #334155;
+    }
+
+    .bottom-dock button span {
+      font-size: 19px;
+      line-height: 1;
+    }
+
+    .bottom-dock button small {
+      font-size: 9px;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .bottom-dock button.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border-color: transparent;
+      transform: translateY(-4px);
+    }
+
+    @media (max-width: 420px) {
+      .bottom-dock {
+        left: 6px;
+        right: 6px;
+        bottom: 8px;
+        gap: 5px;
+      }
+
+      .bottom-dock button {
+        min-height: 54px;
+        border-radius: 16px;
+      }
+
+      .bottom-dock button span {
+        font-size: 18px;
+      }
+
+      .bottom-dock button small {
+        font-size: 8px;
+      }
+    }
+
     @media print {
       body * { visibility: hidden; }
       #printArea, #printArea * { visibility: visible; }
@@ -424,10 +871,8 @@
         top: 0;
         width: 100%;
       }
-      .actions, .top-back, header, footer { display: none !important; }
-    }
-
-    @media (max-width: 950px) {
+      .actions, .top-back, header, footer, .bottom-nav,
+@media (max-width: 950px) {
       .home-grid { grid-template-columns: repeat(4,1fr); }
       .dashboard-grid { grid-template-columns: repeat(2,1fr); }
       .grid-3 { grid-template-columns: 1fr; }
@@ -542,42 +987,519 @@
         font-size: 12px;
       }
     }
+  
+    /* Rodapé com botões visíveis */
+    main {
+      padding-bottom: 132px !important;
+    }
+
+    .bottom-dock {
+      position: fixed !important;
+      left: 8px !important;
+      right: 8px !important;
+      bottom: 8px !important;
+      z-index: 99999 !important;
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 8px !important;
+      padding: 8px !important;
+      background: rgba(255,255,255,.96) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 24px !important;
+      box-shadow: 0 14px 34px rgba(15,23,42,.24) !important;
+      backdrop-filter: blur(14px) !important;
+    }
+
+    body.dark .bottom-dock {
+      background: rgba(15,23,42,.96) !important;
+    }
+
+    .bottom-dock button {
+      min-height: 50px !important;
+      padding: 7px 4px !important;
+      border-radius: 16px !important;
+      border: 1px solid rgba(226,232,240,.9) !important;
+      background: #ffffff !important;
+      color: #334155 !important;
+      box-shadow: 0 5px 12px rgba(15,23,42,.10) !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 5px !important;
+      font-size: 12px !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+    }
+
+    body.dark .bottom-dock button {
+      background: #1e293b !important;
+      color: #e5e7eb !important;
+      border-color: #334155 !important;
+    }
+
+    .bottom-dock .dock-icon {
+      font-size: 17px !important;
+      line-height: 1 !important;
+      display: inline-block !important;
+    }
+
+    .bottom-dock .dock-label {
+      display: inline-block !important;
+      font-size: 11px !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      white-space: nowrap !important;
+    }
+
+    .bottom-dock button.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+      color: #ffffff !important;
+      border-color: transparent !important;
+    }
+
+    @media (max-width: 420px) {
+      .bottom-dock {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+        padding: 7px !important;
+      }
+
+      .bottom-dock button {
+        min-height: 48px !important;
+        font-size: 11px !important;
+        gap: 4px !important;
+      }
+
+      .bottom-dock .dock-icon {
+        font-size: 16px !important;
+      }
+
+      .bottom-dock .dock-label {
+        font-size: 10px !important;
+      }
+    }
+
+    @media print {
+      .bottom-dock {
+        display: none !important;
+      }
+    }
+
+  
+    /* DOCK PRINCIPAL - BOTÕES VISÍVEIS */
+    body {
+      padding-bottom: 120px !important;
+    }
+
+    main {
+      padding-bottom: 120px !important;
+    }
+
+    #appDock.app-dock {
+      position: fixed !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      bottom: 14px !important;
+      width: min(720px, calc(100vw - 20px)) !important;
+      z-index: 2147483647 !important;
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 8px !important;
+      padding: 10px !important;
+      background: rgba(255, 255, 255, 0.98) !important;
+      border: 2px solid rgba(37, 99, 235, 0.25) !important;
+      border-radius: 24px !important;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.32) !important;
+      backdrop-filter: blur(16px) !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    body.dark #appDock.app-dock {
+      background: rgba(15, 23, 42, 0.98) !important;
+      border-color: rgba(96, 165, 250, 0.35) !important;
+    }
+
+    #appDock.app-dock button {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 6px !important;
+      min-height: 52px !important;
+      padding: 8px 6px !important;
+      border-radius: 16px !important;
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border: 1px solid #cbd5e1 !important;
+      box-shadow: 0 7px 16px rgba(15, 23, 42, 0.16) !important;
+      font-size: 18px !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    body.dark #appDock.app-dock button {
+      background: #1e293b !important;
+      color: #ffffff !important;
+      border-color: #475569 !important;
+    }
+
+    #appDock.app-dock button span {
+      display: inline-block !important;
+      font-size: 12px !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      color: inherit !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    #appDock.app-dock button.active {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+      color: #ffffff !important;
+      border-color: transparent !important;
+    }
+
+    @media (max-width: 520px) {
+      #appDock.app-dock {
+        grid-template-columns: repeat(3, 1fr) !important;
+        left: 8px !important;
+        right: 8px !important;
+        width: auto !important;
+        transform: none !important;
+        bottom: 8px !important;
+        gap: 6px !important;
+        padding: 8px !important;
+      }
+
+      #appDock.app-dock button {
+        min-height: 48px !important;
+        font-size: 16px !important;
+        gap: 4px !important;
+        padding: 6px 3px !important;
+      }
+
+      #appDock.app-dock button span {
+        font-size: 10px !important;
+      }
+    }
+
+    @media print {
+      #appDock.app-dock {
+        display: none !important;
+      }
+    }
+
+  
+    /* Ajuste fino do dock para alinhamento correto */
+    body {
+      padding-bottom: 138px !important;
+    }
+
+    main {
+      padding-bottom: 138px !important;
+    }
+
+    #appDock.app-dock {
+      position: fixed !important;
+      left: 50% !important;
+      right: auto !important;
+      transform: translateX(-50%) !important;
+      bottom: 14px !important;
+      width: min(1080px, calc(100vw - 40px)) !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 10px !important;
+      padding: 10px 12px !important;
+      margin: 0 auto !important;
+      background: rgba(255, 255, 255, 0.98) !important;
+      border: 1px solid rgba(37, 99, 235, 0.22) !important;
+      border-radius: 24px !important;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.20) !important;
+      z-index: 2147483647 !important;
+    }
+
+    body.dark #appDock.app-dock {
+      background: rgba(15, 23, 42, 0.98) !important;
+      border-color: rgba(96, 165, 250, 0.32) !important;
+    }
+
+    #appDock.app-dock button {
+      flex: 1 1 150px !important;
+      max-width: 160px !important;
+      min-width: 145px !important;
+      min-height: 50px !important;
+      padding: 8px 10px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 7px !important;
+      border-radius: 16px !important;
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border: 1px solid #dbe2ea !important;
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.10) !important;
+      font-size: 16px !important;
+      font-weight: 800 !important;
+      line-height: 1 !important;
+      white-space: nowrap !important;
+    }
+
+    body.dark #appDock.app-dock button {
+      background: #1e293b !important;
+      color: #ffffff !important;
+      border-color: #475569 !important;
+    }
+
+    #appDock.app-dock button span {
+      font-size: 12px !important;
+      font-weight: 800 !important;
+      line-height: 1 !important;
+      white-space: nowrap !important;
+    }
+
+    #appDock.app-dock button.active {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+      color: #ffffff !important;
+      border-color: transparent !important;
+    }
+
+    @media (max-width: 900px) {
+      #appDock.app-dock {
+        width: calc(100vw - 24px) !important;
+        gap: 8px !important;
+      }
+
+      #appDock.app-dock button {
+        flex: 1 1 140px !important;
+        max-width: none !important;
+        min-width: 135px !important;
+      }
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding-bottom: 170px !important;
+      }
+
+      main {
+        padding-bottom: 170px !important;
+      }
+
+      #appDock.app-dock {
+        width: calc(100vw - 16px) !important;
+        left: 8px !important;
+        right: 8px !important;
+        transform: none !important;
+        bottom: 8px !important;
+        gap: 6px !important;
+        padding: 8px !important;
+        justify-content: space-between !important;
+      }
+
+      #appDock.app-dock button {
+        flex: 1 1 calc(50% - 6px) !important;
+        min-width: calc(50% - 6px) !important;
+        max-width: calc(50% - 6px) !important;
+        min-height: 46px !important;
+        font-size: 15px !important;
+        gap: 6px !important;
+      }
+
+      #appDock.app-dock button span {
+        font-size: 11px !important;
+      }
+    }
+
+    @media print {
+      #appDock.app-dock {
+        display: none !important;
+      }
+    }
+
+  
+    /* Tela de login */
+    body.logged-out {
+      overflow: hidden;
+    }
+
+    body.logged-out .app-protected {
+      display: none !important;
+    }
+
+    .login-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483647;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background:
+        radial-gradient(circle at top right, rgba(59, 130, 246, 0.26), transparent 28%),
+        linear-gradient(180deg, #0f172a, #111827);
+    }
+
+    body.logged-in .login-screen {
+      display: none !important;
+    }
+
+    .login-card {
+      width: min(420px, 100%);
+      background: rgba(255, 255, 255, 0.96);
+      color: #0f172a;
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      border-radius: 28px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      padding: 28px 22px;
+      text-align: center;
+    }
+
+    .login-logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 14px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    }
+
+    .login-card h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      color: #0f172a;
+    }
+
+    .login-card p {
+      margin: 0 0 16px;
+      color: #64748b;
+      line-height: 1.45;
+    }
+
+    .login-field {
+      text-align: left;
+      margin-bottom: 12px;
+    }
+
+    .login-field label {
+      color: #334155;
+      font-weight: 800;
+      font-size: 13px;
+      margin-bottom: 7px;
+      display: block;
+    }
+
+    .login-field input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 16px;
+      background: #ffffff;
+      color: #0f172a;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .login-field input:focus {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14);
+    }
+
+    .login-button {
+      width: 100%;
+      margin-top: 6px;
+      border: 0;
+      border-radius: 16px;
+      padding: 14px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+    }
+
+    .login-msg {
+      min-height: 20px;
+      margin-top: 12px !important;
+      margin-bottom: 6px !important;
+      color: #dc2626 !important;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .login-help {
+      font-size: 12px;
+      margin-bottom: 0 !important;
+    }
+
+    @media (max-width: 520px) {
+      .login-card {
+        padding: 24px 18px;
+        border-radius: 24px;
+      }
+
+      .login-card h1 {
+        font-size: 24px;
+      }
+    }
+
   </style>
 </head>
-<body>
-<header>
+<body class="logged-out">
+
+  <section id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">📘</div>
+      <h1>Agenda de Aulas</h1>
+      <p id="loginSubtitle">Acesse sua agenda.</p>
+
+      <div class="login-field">
+        <label for="loginUsuario">Usuário</label>
+        <input type="text" id="loginUsuario" autocomplete="username" placeholder="Digite o usuário">
+      </div>
+
+      <div class="login-field">
+        <label for="loginSenha">Senha</label>
+        <input type="password" id="loginSenha" autocomplete="current-password" placeholder="Digite a senha">
+      </div>
+
+      <button class="login-button" type="button" onclick="entrarNoApp()">Entrar</button>
+
+      <p id="loginMsg" class="login-msg"></p>
+      <p class="login-help">No primeiro acesso, crie seu usuário e senha.</p>
+    </div>
+  </section>
+
+<header class="app-protected">
   <div class="header-shell">
     <div class="header-badge">Painel do Professor</div>
     <h1>Agenda de Aulas</h1>
-    <p>Controle de aulas, planejamento, relatórios e backup.</p>
+    <p>Controle de aulas.</p>
   </div>
 </header>
 
-<main>
+<main class="app-protected">
   <section id="telaInicio" class="screen active">
     <div class="welcome">
-      <h2>Início</h2>
-      <p>Resumo e atalhos principais.</p>
+      <h2>Agenda de Aulas</h2>
+      <p>Painel inicial</p>
       <p id="dbStatus" style="margin-top:10px;font-size:13px;color:#1e40af;font-weight:bold;">Conectando banco...</p>
     </div>
 
-    <div class="dashboard-grid">
-      <div class="stat"><strong id="dashHoje">0</strong><span>Aulas hoje</span></div>
+    <div class="dashboard-grid dashboard-footer-mode">
+      <div class="stat"><strong id="dashHoje">0</strong><span>Hoje</span></div>
       <div class="stat"><strong id="dashPendentes">0</strong><span>Pendentes</span></div>
-      <div class="stat"><strong id="dashMes">0</strong><span>Registros no mês</span></div>
+      <div class="stat"><strong id="dashMes">0</strong><span>Mês</span></div>
       <div class="stat"><strong id="dashTotal">0</strong><span>Total</span></div>
     </div>
-
-    <div class="home-grid">
-      <div class="home-card" onclick="abrirTela('telaRegistro')"><div class="home-icon">➕</div><h3>Registrar</h3><p>Cadastrar aula, conteúdo e observações.</p></div>
-      <div class="home-card" onclick="abrirTela('telaPesquisa')"><div class="home-icon">🔎</div><h3>Pesquisar</h3><p>Buscar aulas registradas.</p></div>
-      <div class="home-card" onclick="abrirTela('telaPlanejamento')"><div class="home-icon">🗓️</div><h3>Planejar</h3><p>Cadastrar e vincular assuntos planejados.</p></div>
-      <div class="home-card" onclick="abrirTela('telaRelatorios')"><div class="home-icon">📊</div><h3>Relatório</h3><p>Gerar relatório por período.</p></div>
-      <div class="home-card" onclick="abrirTela('telaResultados')"><div class="home-icon">📋</div><h3>Resultados</h3><p>Ver registros encontrados.</p></div>
-      <div class="home-card" onclick="registrarAulaHoje()"><div class="home-icon">⚡</div><h3>Aula hoje</h3><p>Atalho para registrar a aula atual.</p></div>
-      <div class="home-card" onclick="alternarTema()"><div class="home-icon">🌙</div><h3>Tema</h3><p>Alternar modo claro/escuro.</p></div>
-      <div class="home-card" onclick="abrirTela('telaBackup')"><div class="home-icon">💾</div><h3>Backup</h3><p>Exportar, importar e recuperar dados.</p></div>
-    </div>  </section>
+  </section>
 
   <section id="telaRegistro" class="screen">
     <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaInicio')">← Início</button></div>
@@ -585,35 +1507,57 @@
       <h2>Registrar aula</h2>
       <form id="formAgenda">
         <input type="hidden" id="editId">
-        <div class="grid">
-          <div><label for="data">Data</label><input type="date" id="data" required></div>
-          <div><label for="aulaNumero">Aula nº</label><input type="text" id="aulaNumero" placeholder="Ex.: Aula 1"></div>
-          <div>
-            <label for="turma">Turma</label>
-            <select id="turma" required onchange="atualizarDisciplinasDaTurma(); carregarPlanosParaRegistro();">
-              <option value="">Selecione a turma</option>
-              <option value="1 ano de desenvolvimento de sistemas">1 ano de desenvolvimento de sistemas</option>
-              <option value="1 ano de programação de jogos">1 ano de programação de jogos</option>
-            </select>
+        <div class="form-section">
+          <div class="form-section-title">📌 Dados da aula</div>
+          <div class="grid">
+            <div><label for="data">Data</label><input type="date" id="data" required></div>
+            <div><label for="aulaNumero">Aula nº</label><input type="text" id="aulaNumero" placeholder="Ex.: Aula 1"></div>
+            <div>
+              <label for="turma">Turma</label>
+              <select id="turma" required onchange="atualizarDisciplinasDaTurma(); carregarPlanosParaRegistro();">
+                <option value="">Selecione a turma</option>
+                <option value="1 ano de desenvolvimento de sistemas">1 ano de desenvolvimento de sistemas</option>
+                <option value="1 ano de programação de jogos">1 ano de programação de jogos</option>
+              </select>
+            </div>
+            <div>
+              <label for="disciplina">Disciplina</label>
+              <select id="disciplina" required onchange="carregarPlanosParaRegistro()">
+                <option value="">Selecione primeiro a turma</option>
+              </select>
+            </div>
           </div>
-          <div>
-            <label for="disciplina">Disciplina</label>
-            <select id="disciplina" required onchange="carregarPlanosParaRegistro()">
-              <option value="">Selecione primeiro a turma</option>
-            </select>
-          </div>
-          <div class="full">
-            <label for="planoRegistro">Planejamento vinculado</label>
-            <select id="planoRegistro" onchange="aplicarPlanoNoRegistro()">
-              <option value="">Selecione turma e disciplina para listar planejamentos</option>
-            </select>
-          </div>
-          <div class="full"><label for="aula">Aula/tema</label><input type="text" id="aula" placeholder="Ex.: Normalização" required></div>
-          <div class="full"><label for="conteudo">Conteúdo ministrado</label><textarea id="conteudo" placeholder="Conteúdo trabalhado na aula" required></textarea></div>
-          <div class="full"><label for="atividade">Atividade realizada</label><textarea id="atividade" placeholder="Atividade aplicada"></textarea></div>
-          <div class="full"><label for="pendencias">Pendências / próxima aula</label><textarea id="pendencias" placeholder="Pendências ou próxima aula"></textarea></div>
-          <div class="full"><label for="observacoes">Observações</label><textarea id="observacoes" placeholder="Observações gerais"></textarea></div>
         </div>
+
+        <div class="form-section">
+          <div class="form-section-title">🗓️ Planejamento</div>
+          <div class="grid">
+            <div class="full">
+              <label for="planoRegistro">Planejamento vinculado</label>
+              <select id="planoRegistro" onchange="aplicarPlanoNoRegistro()">
+                <option value="">Selecione turma e disciplina para listar planejamentos</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">📚 Conteúdo</div>
+          <div class="grid">
+            <div class="full"><label for="aula">Aula/tema</label><input type="text" id="aula" placeholder="Ex.: Normalização" required></div>
+            <div class="full"><label for="conteudo">Conteúdo ministrado</label><textarea id="conteudo" placeholder="Conteúdo trabalhado na aula" required></textarea></div>
+            <div class="full"><label for="atividade">Atividade realizada</label><textarea id="atividade" placeholder="Atividade aplicada"></textarea></div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">✅ Finalização</div>
+          <div class="grid">
+            <div class="full"><label for="pendencias">Pendências / próxima aula</label><textarea id="pendencias" placeholder="Pendências ou próxima aula"></textarea></div>
+            <div class="full"><label for="observacoes">Observações</label><textarea id="observacoes" placeholder="Observações gerais"></textarea></div>
+          </div>
+        </div>
+
         <div class="actions">
           <button class="btn-primary" type="submit">Salvar registro</button>
           <button class="btn-secondary" type="button" onclick="limparFormulario()">Limpar</button>
@@ -728,6 +1672,40 @@
     </section>
   </section>
 
+
+  <section id="telaConfiguracoes" class="screen">
+    <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaInicio')">← Início</button></div>
+    <section class="card">
+      <h2>Configurações</h2>
+      <div class="settings-list">
+        <div class="settings-item">
+          <div><strong>Tema</strong><span>Alternar entre modo claro e escuro.</span></div>
+          <button class="btn-secondary" type="button" onclick="alternarTema()">Alterar</button>
+        </div>
+
+        <div class="settings-item">
+          <div><strong>Alterar login</strong><span>Trocar usuário e senha de acesso.</span></div>
+          <button class="btn-secondary" type="button" onclick="alterarLogin()">Alterar</button>
+        </div>
+        <div class="settings-item">
+          <div><strong>Sair</strong><span>Bloquear o app e voltar para a tela de login.</span></div>
+          <button class="btn-danger" type="button" onclick="sairDoApp()">Sair</button>
+        </div>
+        <div class="settings-item">
+          <div><strong>Backup</strong><span>Exportar, importar ou recuperar dados.</span></div>
+          <button class="btn-primary" type="button" onclick="abrirTela('telaBackup')">Abrir</button>
+        </div>
+        <div class="settings-item">
+          <div><strong>Apagar dados</strong><span>Remove registros e planejamentos do banco interno.</span></div>
+          <button class="btn-danger" type="button" onclick="apagarTudo()">Apagar</button>
+        </div>
+        <div class="settings-item">
+          <div><strong>Sobre</strong><span>Agenda de Aulas com banco interno IndexedDB.</span></div>
+        </div>
+      </div>
+    </section>
+  </section>
+
   <section id="telaBackup" class="screen">
     <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaInicio')">← Início</button></div>
     <section class="card">
@@ -745,7 +1723,149 @@
   </section>
 </main>
 
-<footer>Dados salvos no banco interno do navegador.</footer>
+  <div id="appDock" class="app-dock app-protected">
+    <button id="navInicio" type="button" onclick="abrirTela('telaInicio')">🏠<span>Início</span></button>
+    <button id="navRegistro" type="button" onclick="abrirTela('telaRegistro')">✏️<span>Registrar</span></button>
+    <button id="navPesquisa" type="button" onclick="abrirTela('telaPesquisa')">🔎<span>Pesquisar</span></button>
+    <button id="navPlanejar" type="button" onclick="abrirTela('telaPlanejamento')">🗓️<span>Planejar</span></button>
+    <button id="navRelatorio" type="button" onclick="abrirTela('telaRelatorios')">📊<span>Relatório</span></button>
+    <button id="navConfig" type="button" onclick="abrirTela('telaConfiguracoes')">⚙️<span>Config.</span></button>
+  </div>
+
+<footer class="app-protected">Dados salvos no banco interno do navegador.</footer>
+
+
+<script>
+const LOGIN_USER_KEY = "agenda_login_usuario_v1";
+const LOGIN_HASH_KEY = "agenda_login_hash_v1";
+const LOGIN_SESSION_KEY = "agenda_login_sessao_v1";
+
+async function gerarHashLogin(texto) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(texto);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function loginConfigurado() {
+  return localStorage.getItem(LOGIN_USER_KEY) && localStorage.getItem(LOGIN_HASH_KEY);
+}
+
+function atualizarTextoLogin() {
+  const subtitulo = document.getElementById("loginSubtitle");
+  const botao = document.querySelector(".login-button");
+  const help = document.querySelector(".login-help");
+
+  if (!loginConfigurado()) {
+    subtitulo.textContent = "Primeiro acesso: crie seu usuário e senha.";
+    botao.textContent = "Criar acesso";
+    help.textContent = "Guarde bem esses dados. Eles serão usados para entrar no app.";
+  } else {
+    subtitulo.textContent = "Digite usuário e senha para acessar.";
+    botao.textContent = "Entrar";
+    help.textContent = "Se esquecer a senha, será necessário redefinir no navegador.";
+  }
+}
+
+async function entrarNoApp() {
+  const usuario = document.getElementById("loginUsuario").value.trim();
+  const senha = document.getElementById("loginSenha").value;
+  const msg = document.getElementById("loginMsg");
+
+  msg.textContent = "";
+
+  if (!usuario || !senha) {
+    msg.textContent = "Preencha usuário e senha.";
+    return;
+  }
+
+  const hash = await gerarHashLogin(usuario + "::" + senha);
+
+  if (!loginConfigurado()) {
+    localStorage.setItem(LOGIN_USER_KEY, usuario);
+    localStorage.setItem(LOGIN_HASH_KEY, hash);
+    sessionStorage.setItem(LOGIN_SESSION_KEY, "ok");
+    liberarApp();
+    return;
+  }
+
+  const usuarioSalvo = localStorage.getItem(LOGIN_USER_KEY);
+  const hashSalvo = localStorage.getItem(LOGIN_HASH_KEY);
+
+  if (usuario === usuarioSalvo && hash === hashSalvo) {
+    sessionStorage.setItem(LOGIN_SESSION_KEY, "ok");
+    liberarApp();
+  } else {
+    msg.textContent = "Usuário ou senha incorretos.";
+  }
+}
+
+function liberarApp() {
+  document.body.classList.remove("logged-out");
+  document.body.classList.add("logged-in");
+  const senha = document.getElementById("loginSenha");
+  if (senha) senha.value = "";
+  setTimeout(() => {
+    if (typeof forceDockLayout === "function") forceDockLayout();
+    if (typeof atualizarMenuRodape === "function") atualizarMenuRodape("telaInicio");
+  }, 100);
+}
+
+function bloquearApp() {
+  document.body.classList.remove("logged-in");
+  document.body.classList.add("logged-out");
+  atualizarTextoLogin();
+}
+
+function sairDoApp() {
+  sessionStorage.removeItem(LOGIN_SESSION_KEY);
+  bloquearApp();
+}
+
+async function alterarLogin() {
+  const usuarioAtual = prompt("Usuário atual:");
+  if (!usuarioAtual) return;
+
+  const senhaAtual = prompt("Senha atual:");
+  if (!senhaAtual) return;
+
+  const hashAtual = await gerarHashLogin(usuarioAtual.trim() + "::" + senhaAtual);
+
+  if (usuarioAtual.trim() !== localStorage.getItem(LOGIN_USER_KEY) || hashAtual !== localStorage.getItem(LOGIN_HASH_KEY)) {
+    alert("Usuário ou senha atual incorretos.");
+    return;
+  }
+
+  const novoUsuario = prompt("Novo usuário:");
+  if (!novoUsuario) return;
+
+  const novaSenha = prompt("Nova senha:");
+  if (!novaSenha) return;
+
+  const novoHash = await gerarHashLogin(novoUsuario.trim() + "::" + novaSenha);
+  localStorage.setItem(LOGIN_USER_KEY, novoUsuario.trim());
+  localStorage.setItem(LOGIN_HASH_KEY, novoHash);
+  alert("Login alterado com sucesso.");
+}
+
+window.addEventListener("load", () => {
+  atualizarTextoLogin();
+
+  if (sessionStorage.getItem(LOGIN_SESSION_KEY) === "ok" && loginConfigurado()) {
+    liberarApp();
+  } else {
+    bloquearApp();
+  }
+
+  document.getElementById("loginSenha").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") entrarNoApp();
+  });
+
+  document.getElementById("loginUsuario").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") entrarNoApp();
+  });
+});
+</script>
 
 <script>
 const DB_NAME = "AgendaAulasDB";
@@ -768,10 +1888,46 @@ const $ = id => document.getElementById(id);
 $("data").valueAsDate = new Date();
 
 function abrirTela(id){
+  if(!confirmarSaidaRegistro(id)) return;
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   $(id).classList.add("active");
+  atualizarMenuRodape(id);
   if(id==="telaInicio") atualizarDashboard();
   window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function atualizarMenuRodape(id){
+  document.querySelectorAll("#appDock button").forEach(btn => btn.classList.remove("active"));
+  const mapa = {
+    telaInicio: "navInicio",
+    telaRegistro: "navRegistro",
+    telaPesquisa: "navPesquisa",
+    telaResultados: "navPesquisa",
+    telaPlanejamento: "navPlanejar",
+    telaRelatorios: "navRelatorio",
+    telaConfiguracoes: "navConfig",
+    telaBackup: "navConfig"
+  };
+  const nav = mapa[id] ? $(mapa[id]) : null;
+  if(nav) nav.classList.add("active");
+}
+
+
+function registroTemAlteracao(){
+  const editando = $("editId").value;
+  return editando ||
+    $("aula").value.trim() ||
+    $("conteudo").value.trim() ||
+    $("atividade").value.trim() ||
+    $("pendencias").value.trim() ||
+    $("observacoes").value.trim();
+}
+
+function confirmarSaidaRegistro(idDestino){
+  const telaRegistroAtiva = $("telaRegistro") && $("telaRegistro").classList.contains("active");
+  if(!telaRegistroAtiva || idDestino === "telaRegistro") return true;
+  if(!registroTemAlteracao()) return true;
+  return confirm("Você tem alterações não salvas. Deseja sair mesmo assim?");
 }
 
 function abrirBanco(){
@@ -842,8 +1998,7 @@ document.getElementById("formAgenda").addEventListener("submit", async e => {
     observacoes: $("observacoes").value.trim(),
     status: antigo?.status || "Pendente"
   };
-  await put(STORE_REGISTROS, registro);
-  limparFormulario();
+  await put(STORE_REGISTROS, registro);  limparFormulario();
   await atualizarDashboard();
   alert("Registro salvo com sucesso!");
 });
@@ -856,6 +2011,7 @@ function limparFormulario(){
   $("planoRegistro").innerHTML = '<option value="">Selecione turma e disciplina para listar planejamentos</option>';
   document.querySelector("#formAgenda button[type='submit']").textContent = "Salvar registro";
 }
+
 
 async function carregarPlanosParaRegistro(){
   const turma = $("turma").value;
@@ -1017,6 +2173,7 @@ function limparFiltrosPesquisa(){
   $("filtroAte").value = "";
 }
 
+
 function aplicarPeriodoRapido(prefixo){
   const val = $(prefixo+"Periodo").value;
   const hoje = new Date();
@@ -1114,13 +2271,28 @@ async function gerarRelatorio(){
   regs = filtrarRegistros(regs,{turma,disciplina,de,ate});
   if(status) regs = regs.filter(r=>r.status===status);
   ultimoRelatorio = regs;
+  const ministradas = regs.filter(r=>r.status==="Ministrada").length;
+  const pendentes = regs.filter(r=>r.status!=="Ministrada").length;
   $("relResumo").textContent = `${regs.length} registro(s) no relatório.`;
-  $("relConteudo").innerHTML = regs.length ? regs.map(r=>`<article class="registro">
+  $("relConteudo").innerHTML = regs.length ? `
+    <div class="report-header">
+      <h3>Relatório de Aulas</h3>
+      <p><strong>Turma:</strong> ${esc(turma || "Todas")}<br>
+      <strong>Disciplina:</strong> ${esc(disciplina || "Todas")}<br>
+      <strong>Período:</strong> ${de ? formatarData(de) : "início"} até ${ate ? formatarData(ate) : "fim"}</p>
+      <div class="report-summary">
+        <div><strong>${regs.length}</strong><span>Total</span></div>
+        <div><strong>${ministradas}</strong><span>Ministradas</span></div>
+        <div><strong>${pendentes}</strong><span>Pendentes</span></div>
+      </div>
+    </div>
+  ` + regs.map(r=>`<article class="registro">
     <div class="meta">${formatarData(r.data)} ${r.aulaNumero?"• "+esc(r.aulaNumero):""}</div>
     <h3>${esc(r.aula)}</h3>
     <p><strong>Turma:</strong> ${esc(r.turma)} | <strong>Disciplina:</strong> ${esc(r.disciplina)} | <strong>Status:</strong> ${esc(r.status)}</p>
     <p><strong>Conteúdo:</strong> ${esc(r.conteudo)||"-"}</p>
     <p><strong>Atividade:</strong> ${esc(r.atividade)||"-"}</p>
+    <p><strong>Pendências:</strong> ${esc(r.pendencias)||"-"}</p>
   </article>`).join("") : '<div class="empty">Nenhum registro para o relatório.</div>';
 }
 
@@ -1236,6 +2408,7 @@ async function iniciarApp(){
   if(localStorage.getItem("tema_agenda_aulas")==="dark") document.body.classList.add("dark");
   $("dbStatus").textContent = "Banco conectado.";
   renderizarResultados();
+  atualizarMenuRodape("telaInicio");
   await atualizarDashboard();
 }
 
@@ -1247,5 +2420,234 @@ if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
 }
 </script>
+
+<style id="dock-reset-style">
+  #appDock{all:initial}
+  #appDock button{all:unset}
+
+    /* Tela de login */
+    body.logged-out {
+      overflow: hidden;
+    }
+
+    body.logged-out .app-protected {
+      display: none !important;
+    }
+
+    .login-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483647;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background:
+        radial-gradient(circle at top right, rgba(59, 130, 246, 0.26), transparent 28%),
+        linear-gradient(180deg, #0f172a, #111827);
+    }
+
+    body.logged-in .login-screen {
+      display: none !important;
+    }
+
+    .login-card {
+      width: min(420px, 100%);
+      background: rgba(255, 255, 255, 0.96);
+      color: #0f172a;
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      border-radius: 28px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      padding: 28px 22px;
+      text-align: center;
+    }
+
+    .login-logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 14px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    }
+
+    .login-card h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      color: #0f172a;
+    }
+
+    .login-card p {
+      margin: 0 0 16px;
+      color: #64748b;
+      line-height: 1.45;
+    }
+
+    .login-field {
+      text-align: left;
+      margin-bottom: 12px;
+    }
+
+    .login-field label {
+      color: #334155;
+      font-weight: 800;
+      font-size: 13px;
+      margin-bottom: 7px;
+      display: block;
+    }
+
+    .login-field input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 16px;
+      background: #ffffff;
+      color: #0f172a;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .login-field input:focus {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14);
+    }
+
+    .login-button {
+      width: 100%;
+      margin-top: 6px;
+      border: 0;
+      border-radius: 16px;
+      padding: 14px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+    }
+
+    .login-msg {
+      min-height: 20px;
+      margin-top: 12px !important;
+      margin-bottom: 6px !important;
+      color: #dc2626 !important;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .login-help {
+      font-size: 12px;
+      margin-bottom: 0 !important;
+    }
+
+    @media (max-width: 520px) {
+      .login-card {
+        padding: 24px 18px;
+        border-radius: 24px;
+      }
+
+      .login-card h1 {
+        font-size: 24px;
+      }
+    }
+
+  </style>
+
+
+<script>
+function forceDockLayout() {
+  const dock = document.getElementById('appDock');
+  if (!dock) return;
+
+  const mobile = window.innerWidth <= 560;
+  const desktopWidth = Math.min(1080, window.innerWidth - 40);
+  const mobileWidth = window.innerWidth - 16;
+
+  document.body.style.paddingBottom = mobile ? '170px' : '138px';
+  const main = document.querySelector('main');
+  if (main) main.style.paddingBottom = mobile ? '170px' : '138px';
+
+  Object.assign(dock.style, {
+    position: 'fixed',
+    left: mobile ? '8px' : '50%',
+    right: mobile ? '8px' : 'auto',
+    transform: mobile ? 'none' : 'translateX(-50%)',
+    bottom: mobile ? '8px' : '14px',
+    width: (mobile ? mobileWidth : desktopWidth) + 'px',
+    zIndex: '2147483647',
+    display: 'grid',
+    gridTemplateColumns: mobile ? 'repeat(2, 1fr)' : 'repeat(6, 1fr)',
+    gap: mobile ? '6px' : '10px',
+    padding: mobile ? '8px' : '10px 12px',
+    margin: '0',
+    background: document.body.classList.contains('dark') ? 'rgba(15,23,42,0.98)' : 'rgba(255,255,255,0.98)',
+    border: document.body.classList.contains('dark') ? '1px solid rgba(96,165,250,0.32)' : '1px solid rgba(37,99,235,0.22)',
+    borderRadius: '24px',
+    boxShadow: '0 18px 40px rgba(15,23,42,0.20)',
+    backdropFilter: 'blur(16px)',
+    boxSizing: 'border-box'
+  });
+
+  const buttons = dock.querySelectorAll('button');
+  buttons.forEach(btn => {
+    Object.assign(btn.style, {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: mobile ? '6px' : '7px',
+      minHeight: mobile ? '46px' : '50px',
+      width: '100%',
+      padding: mobile ? '6px 8px' : '8px 10px',
+      borderRadius: '16px',
+      background: document.body.classList.contains('dark') ? '#1e293b' : '#ffffff',
+      color: '#0f172a',
+      border: document.body.classList.contains('dark') ? '1px solid #475569' : '1px solid #dbe2ea',
+      boxShadow: '0 6px 14px rgba(15,23,42,0.10)',
+      fontSize: mobile ? '15px' : '16px',
+      fontWeight: '800',
+      lineHeight: '1',
+      whiteSpace: 'nowrap',
+      boxSizing: 'border-box',
+      cursor: 'pointer',
+      fontFamily: '"Segoe UI", Arial, sans-serif'
+    });
+    if (document.body.classList.contains('dark')) {
+      btn.style.color = '#ffffff';
+    }
+    const span = btn.querySelector('span');
+    if (span) {
+      Object.assign(span.style, {
+        fontSize: mobile ? '11px' : '12px',
+        fontWeight: '800',
+        lineHeight: '1',
+        whiteSpace: 'nowrap',
+        display: 'inline-block',
+        color: 'inherit'
+      });
+    }
+    if (btn.classList.contains('active')) {
+      btn.style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8)';
+      btn.style.color = '#ffffff';
+      btn.style.border = '1px solid transparent';
+    }
+  });
+}
+
+(function() {
+  const originalUpdate = window.atualizarMenuRodape;
+  window.atualizarMenuRodape = function(id) {
+    if (typeof originalUpdate === 'function') originalUpdate(id);
+    forceDockLayout();
+  };
+
+  window.addEventListener('load', forceDockLayout);
+  window.addEventListener('resize', forceDockLayout);
+  setTimeout(forceDockLayout, 50);
+  setTimeout(forceDockLayout, 300);
+})();
+</script>
+
 </body>
 </html>
