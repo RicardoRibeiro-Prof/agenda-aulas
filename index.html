@@ -1769,6 +1769,11 @@ body.dark
           <div><strong>Sair</strong><span>Bloquear o app e voltar para a tela de login.</span></div>
           <button class="btn-danger" type="button" onclick="sairDoApp()">Sair</button>
         </div>
+
+        <div class="settings-item">
+          <div><strong>Sincronização</strong><span>Puxar dados de outro dispositivo usando Google Sheets.</span></div>
+          <button class="btn-primary" type="button" onclick="abrirTela('telaSincronizacao')">Abrir</button>
+        </div>
         <div class="settings-item">
           <div><strong>Backup</strong><span>Exportar, importar ou recuperar dados.</span></div>
           <button class="btn-primary" type="button" onclick="abrirTela('telaBackup')">Abrir</button>
@@ -1784,6 +1789,33 @@ body.dark
     </section>
   </section>
 
+
+
+  <section id="telaSincronizacao" class="screen">
+    <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaConfiguracoes')">← Config.</button></div>
+    <section class="card">
+      <h2>Sincronização</h2>
+      <div class="status-box">
+        Cole aqui a URL do Web App criado no Apps Script. Assim os dados podem ser enviados para a planilha e puxados em outro dispositivo.
+      </div>
+
+      <div class="grid">
+        <div class="full">
+          <label for="syncUrl">URL do Web App</label>
+          <input id="syncUrl" placeholder="Cole a URL do Apps Script aqui">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" type="button" onclick="salvarURLSync()">Salvar URL</button>
+        <button class="btn-success" type="button" onclick="enviarDadosNuvem()">Enviar dados</button>
+        <button class="btn-secondary" type="button" onclick="baixarDadosNuvem()">Puxar dados</button>
+        <button class="btn-warning" type="button" onclick="sincronizarTudo()">Sincronizar agora</button>
+      </div>
+
+      <div id="syncStatus" class="status-box" style="margin-top:14px;">Sincronização não configurada.</div>
+    </section>
+  </section>
 
   <section id="telaHistorico" class="screen">
     <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaRelatorios')">← Relatórios</button></div>
@@ -1976,6 +2008,172 @@ const SECURITY_QUESTION_KEY = "agenda_security_question_v1";
 const SECURITY_ANSWER_HASH_KEY = "agenda_security_answer_hash_v1";
 const LAST_BACKUP_KEY = "agenda_ultimo_backup_v1";
 
+const SYNC_URL_KEY = "agenda_sync_url_v1";
+const DEVICE_ID_KEY = "agenda_device_id_v1";
+
+function getDeviceId() {
+  let id = localStorage.getItem(DEVICE_ID_KEY);
+  if (!id) {
+    id = "disp-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+    localStorage.setItem(DEVICE_ID_KEY, id);
+  }
+  return id;
+}
+
+function carregarURLSync() {
+  const input = $("syncUrl");
+  if (input) input.value = localStorage.getItem(SYNC_URL_KEY) || "";
+  atualizarStatusSync();
+}
+
+function salvarURLSync() {
+  const url = $("syncUrl").value.trim();
+  if (!url) {
+    alert("Cole a URL do Web App.");
+    return;
+  }
+  localStorage.setItem(SYNC_URL_KEY, url);
+  atualizarStatusSync("URL salva. Você já pode sincronizar.");
+}
+
+function getSyncURL() {
+  return localStorage.getItem(SYNC_URL_KEY) || "";
+}
+
+function atualizarStatusSync(texto = "") {
+  const box = $("syncStatus");
+  if (!box) return;
+  const url = getSyncURL();
+  box.textContent = texto || (url ? "Sincronização configurada." : "Sincronização não configurada.");
+}
+
+async function chamarSync(payload) {
+  const url = getSyncURL();
+  if (!url) {
+    alert("Configure a URL de sincronização primeiro.");
+    abrirTela("telaSincronizacao");
+    return null;
+  }
+
+  atualizarStatusSync("Conectando à nuvem...");
+
+  const resposta = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  });
+
+  const texto = await resposta.text();
+
+  try {
+    return JSON.parse(texto);
+  } catch (e) {
+    throw new Error("Resposta inválida do servidor: " + texto.slice(0, 120));
+  }
+}
+
+async function enviarDadosNuvem() {
+  try {
+    const registros = await getAll(STORE_REGISTROS);
+    const planejamentos = await getAll(STORE_PLANOS);
+    const perfil = getPerfil();
+
+    const retorno = await chamarSync({
+      action: "pushAll",
+      deviceId: getDeviceId(),
+      updatedAt: new Date().toISOString(),
+      data: { registros, planejamentos, perfil }
+    });
+
+    if (retorno && retorno.ok) {
+      atualizarStatusSync("Dados enviados com sucesso.");
+      alert("Dados enviados para a nuvem.");
+    } else {
+      throw new Error(retorno?.error || "Falha ao enviar.");
+    }
+  } catch (erro) {
+    atualizarStatusSync("Erro ao enviar dados.");
+    alert("Erro ao enviar dados: " + erro.message);
+  }
+}
+
+async function baixarDadosNuvem() {
+  try {
+    const retorno = await chamarSync({
+      action: "pullAll",
+      deviceId: getDeviceId()
+    });
+
+    if (!retorno || !retorno.ok) {
+      throw new Error(retorno?.error || "Falha ao puxar dados.");
+    }
+
+    const dados = retorno.data || {};
+    const registros = dados.registros || [];
+    const planejamentos = dados.planejamentos || [];
+    const perfil = dados.perfil || null;
+
+    if (!confirm(`Puxar ${registros.length} registro(s) e ${planejamentos.length} planejamento(s) da nuvem? Isso vai substituir os dados deste aparelho.`)) {
+      atualizarStatusSync("Operação cancelada.");
+      return;
+    }
+
+    await clearStore(STORE_REGISTROS);
+    await clearStore(STORE_PLANOS);
+
+    for (const r of registros) {
+      if (!r.id) r.id = Date.now().toString() + Math.random().toString(16).slice(2);
+      if (!r.status) r.status = "Pendente";
+      await put(STORE_REGISTROS, r);
+    }
+
+    for (const p of planejamentos) {
+      if (!p.id) p.id = Date.now().toString() + Math.random().toString(16).slice(2);
+      await put(STORE_PLANOS, p);
+    }
+
+    if (perfil) {
+      localStorage.setItem(PERFIL_KEY, JSON.stringify(perfil));
+    }
+
+    ultimaBusca = [];
+    ultimoRelatorio = [];
+    renderizarResultados();
+    await atualizarDashboard();
+    atualizarStatusSync("Dados puxados com sucesso.");
+    alert("Dados puxados da nuvem com sucesso.");
+  } catch (erro) {
+    atualizarStatusSync("Erro ao puxar dados.");
+    alert("Erro ao puxar dados: " + erro.message);
+  }
+}
+
+async function sincronizarTudo() {
+  await enviarDadosNuvem();
+}
+
+async function sincronizarAoSalvar() {
+  if (!getSyncURL()) return;
+  try {
+    await enviarDadosNuvem();
+  } catch (e) {
+    console.warn("Sincronização automática falhou:", e);
+  }
+}
+
+async function sincronizarAoAbrir() {
+  if (!getSyncURL()) return;
+  try {
+    const retorno = await chamarSync({ action: "status", deviceId: getDeviceId() });
+    if (retorno && retorno.ok) {
+      atualizarStatusSync("Conectado à nuvem.");
+    }
+  } catch (e) {
+    console.warn("Status de sincronização indisponível:", e);
+  }
+}
+
+
 function getPerfil() {
   try {
     return JSON.parse(localStorage.getItem(PERFIL_KEY) || "{}");
@@ -2000,6 +2198,7 @@ function salvarPerfil() {
     cidade: $("perfilCidade").value.trim()
   };
   localStorage.setItem(PERFIL_KEY, JSON.stringify(perfil));
+  sincronizarAoSalvar();
   alert("Perfil salvo com sucesso.");
 }
 
@@ -2159,6 +2358,7 @@ function abrirTela(id){
   atualizarMenuRodape(id);
   if(id==="telaInicio") atualizarDashboard();
   if(id==="telaPerfil") carregarPerfil();
+  if(id==="telaSincronizacao") carregarURLSync();
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
@@ -2173,6 +2373,7 @@ function atualizarMenuRodape(id){
     telaRelatorios: "navRelatorio",
     telaConfiguracoes: "navConfig",
     telaPerfil: "navConfig",
+    telaSincronizacao: "navConfig",
     telaHistorico: "navRelatorio",
     telaBackup: "navConfig"
   };
@@ -2281,6 +2482,7 @@ document.getElementById("formAgenda").addEventListener("submit", async e => {
 
   await put(STORE_REGISTROS, registro);  limparFormulario();
   await atualizarDashboard();
+  sincronizarAoSalvar();
   alert("Registro salvo com sucesso!");
 });
 
@@ -2496,6 +2698,7 @@ $("formPlano").addEventListener("submit", async e=>{
   if(!plano.turma || !plano.disciplina || !plano.assunto){ alert("Preencha turma, disciplina e assunto."); return; }
   await put(STORE_PLANOS,plano);
   limparPlano();
+  sincronizarAoSalvar();
   alert("Planejamento salvo.");
 });
 
@@ -2702,6 +2905,8 @@ async function iniciarApp(){
   atualizarMenuRodape("telaInicio");
   await atualizarDashboard();
   verificarLembreteBackup();
+  carregarURLSync();
+  sincronizarAoAbrir();
 }
 
 iniciarApp();
