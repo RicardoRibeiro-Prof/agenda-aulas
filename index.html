@@ -1806,6 +1806,9 @@ body.dark
     <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaConfiguracoes')">← Config.</button></div>
     <section class="card">
       <h2>Sincronização</h2>
+      <div class="status-box" style="border-color:#f59e0b;background:rgba(245,158,11,.12);">
+        <strong>Modo recuperação:</strong> esta versão não apaga dados locais ao puxar da nuvem. Ela mescla os registros encontrados na planilha com o banco deste aparelho.
+      </div>
       <div class="status-box">
         Cole aqui a URL do Web App. Depois clique em <strong>Puxar dados</strong> para carregar no computador os registros enviados pelo celular.
       </div>
@@ -1826,7 +1829,7 @@ body.dark
 
       <div id="syncStatus" class="status-box" style="margin-top:14px;">Sincronização não configurada.</div>
       <div class="status-box" style="margin-top:10px;">
-        <strong>Automação ativa:</strong> ao abrir o app, ele pergunta se deseja puxar dados da nuvem. Ao salvar aula, planejamento ou perfil, ele envia em segundo plano sem mostrar alerta.
+        <strong>Modo recuperação ativo:</strong> ao abrir o app, ele pergunta se deseja puxar dados da nuvem. Ao salvar aula, planejamento ou perfil, ele envia em segundo plano sem mostrar alerta.
       </div>
       <div class="actions">
         <button class="btn-secondary" type="button" onclick="ativarPerguntaAoAbrir()">Perguntar ao abrir novamente</button>
@@ -2052,7 +2055,6 @@ function salvarPerfil() {
     cidade: $("perfilCidade") ? $("perfilCidade").value.trim() : ""
   };
   localStorage.setItem(PERFIL_KEY, JSON.stringify(perfil));
-  if (typeof sincronizarAoSalvar === "function") sincronizarAoSalvar();
   alert("Perfil salvo com sucesso.");
 }
 
@@ -2247,23 +2249,14 @@ async function enviarDadosNuvem(silencioso = false) {
     const perfil = (typeof getPerfil === "function") ? getPerfil() : {};
 
     if (registros.length === 0 && planejamentos.length === 0) {
-      if (!silencioso) {
-        alert("Este dispositivo está vazio. Para não apagar os dados da nuvem, o envio foi bloqueado. Use 'Puxar dados' primeiro.");
-      }
+      alert("Este dispositivo está vazio. O envio foi bloqueado para não apagar a planilha.");
       atualizarStatusSync("Envio bloqueado: dispositivo vazio.");
       return false;
     }
 
-    const resumoNuvem = await obterResumoNuvem();
-
-    if (!silencioso && resumoNuvem && resumoNuvem.registros > registros.length) {
-      const continuar = confirm(
-        `A nuvem possui ${resumoNuvem.registros} registro(s), mas este dispositivo possui ${registros.length}.\\n\\nEnviar agora pode substituir dados da nuvem por uma versão menor.\\n\\nDeseja enviar mesmo assim?`
-      );
-      if (!continuar) {
-        atualizarStatusSync("Envio cancelado para proteger os dados da nuvem.");
-        return false;
-      }
+    if (!confirm(`ATENÇÃO: você vai enviar ${registros.length} registro(s) e ${planejamentos.length} planejamento(s) para a planilha.\\n\\nFaça isso somente se estes dados estiverem corretos neste aparelho.\\n\\nDeseja continuar?`)) {
+      atualizarStatusSync("Envio cancelado.");
+      return false;
     }
 
     atualizarStatusSync(`Enviando ${registros.length} registro(s) e ${planejamentos.length} planejamento(s) para a nuvem...`);
@@ -2275,27 +2268,19 @@ async function enviarDadosNuvem(silencioso = false) {
       data: { registros, planejamentos, perfil }
     });
 
-    atualizarStatusSync(`Sincronizado: ${registros.length} registro(s) e ${planejamentos.length} planejamento(s) enviados.`);
-    atualizarCardNuvemInicio();
-
-    if (!silencioso) {
-      alert("Dados enviados para a nuvem.");
-    }
-
+    atualizarStatusSync(`Dados enviados: ${registros.length} registro(s) e ${planejamentos.length} planejamento(s).`);
+    if (typeof atualizarCardNuvemInicio === "function") atualizarCardNuvemInicio();
+    alert("Dados enviados para a nuvem.");
     return true;
   } catch (erro) {
     atualizarStatusSync("Erro ao enviar dados.");
-    if (!silencioso) {
-      alert("Erro ao enviar dados: " + erro.message);
-    } else {
-      console.warn("Erro ao enviar em segundo plano:", erro);
-    }
+    alert("Erro ao enviar dados: " + erro.message);
     return false;
   }
 }
 async function baixarDadosNuvem(modoAutomatico = false) {
   try {
-    atualizarStatusSync("Puxando dados da nuvem...");
+    atualizarStatusSync("Puxando dados da nuvem em modo seguro...");
 
     const retorno = await jsonpSync("pullAll");
 
@@ -2309,33 +2294,51 @@ async function baixarDadosNuvem(modoAutomatico = false) {
     const perfil = dados.perfil || null;
 
     if (registros.length === 0 && planejamentos.length === 0 && !perfil) {
-      atualizarStatusSync("A nuvem está vazia.");
-      if (!modoAutomatico) alert("Não há dados na nuvem para puxar.");
+      atualizarStatusSync("A nuvem está vazia. Nada foi alterado neste aparelho.");
+      if (!modoAutomatico) alert("A nuvem está vazia. Nada foi alterado neste aparelho.");
       return;
     }
 
     if (!modoAutomatico) {
-      if (registros.length === 0 && planejamentos.length > 0) {
-      alert("A nuvem está retornando 0 registros de aula e apenas planejamento. Confira a planilha: talvez os registros tenham sido sobrescritos por um aparelho vazio.");
-    }
-
-    if (!confirm(`Puxar ${registros.length} registro(s) e ${planejamentos.length} planejamento(s) da nuvem? Isso vai substituir os dados deste aparelho.`)) {
+      const ok = confirm(
+        `Modo seguro: mesclar ${registros.length} registro(s) e ${planejamentos.length} planejamento(s) da nuvem com este aparelho?\\n\\nNada será apagado do aparelho.`
+      );
+      if (!ok) {
         atualizarStatusSync("Operação cancelada.");
         return;
       }
     }
 
-    await clearStore(STORE_REGISTROS);
-    await clearStore(STORE_PLANOS);
+    const locais = await getAll(STORE_REGISTROS);
+    const planosLocais = await getAll(STORE_PLANOS);
+    const idsLocais = new Set(locais.map(r => String(r.id)));
+    const idsPlanosLocais = new Set(planosLocais.map(p => String(p.id)));
+
+    let novosRegistros = 0;
+    let novosPlanos = 0;
+    let atualizadosRegistros = 0;
+    let atualizadosPlanos = 0;
 
     for (const r of registros) {
       if (!r.id) r.id = Date.now().toString() + Math.random().toString(16).slice(2);
       if (!r.status) r.status = "Pendente";
+
+      if (idsLocais.has(String(r.id))) {
+        atualizadosRegistros++;
+      } else {
+        novosRegistros++;
+      }
       await put(STORE_REGISTROS, r);
     }
 
     for (const p of planejamentos) {
       if (!p.id) p.id = Date.now().toString() + Math.random().toString(16).slice(2);
+
+      if (idsPlanosLocais.has(String(p.id))) {
+        atualizadosPlanos++;
+      } else {
+        novosPlanos++;
+      }
       await put(STORE_PLANOS, p);
     }
 
@@ -2347,48 +2350,29 @@ async function baixarDadosNuvem(modoAutomatico = false) {
     ultimoRelatorio = [];
     renderizarResultados();
     await atualizarDashboard();
-    atualizarStatusSync(`Dados puxados com sucesso: ${registros.length} registro(s).`);
-    atualizarCardNuvemInicio();
+    if (typeof atualizarCardNuvemInicio === "function") atualizarCardNuvemInicio();
+
+    const msg = `Recuperação concluída. Novos registros: ${novosRegistros}. Atualizados: ${atualizadosRegistros}. Novos planejamentos: ${novosPlanos}.`;
+    atualizarStatusSync(msg);
 
     if (!modoAutomatico) {
-      alert("Dados puxados da nuvem com sucesso.");
+      alert(msg);
     }
   } catch (erro) {
     atualizarStatusSync("Erro ao puxar dados.");
     if (!modoAutomatico) {
-      alert("Erro ao puxar dados: " + erro.message + "\n\nConfira se a URL do Web App foi colada em Config. > Sincronização.");
+      alert("Erro ao puxar dados: " + erro.message + "\\n\\nConfira a URL do Web App e a planilha.");
     } else {
       console.warn("Puxar automático falhou:", erro);
     }
   }
 }
 async function sincronizarTudo() {
-  const registrosLocais = await getAll(STORE_REGISTROS);
-  const planosLocais = await getAll(STORE_PLANOS);
-
-  if (registrosLocais.length === 0 && planosLocais.length === 0) {
-    await baixarDadosNuvem(false);
-  } else {
-    await enviarDadosNuvem(false);
-  }
+  await baixarDadosNuvem(false);
 }
-
 async function sincronizarAoSalvar() {
   if (!getSyncURL()) return;
-
-  try {
-    const registros = await getAll(STORE_REGISTROS);
-    const planejamentos = await getAll(STORE_PLANOS);
-
-    if (registros.length === 0 && planejamentos.length === 0) {
-      console.warn("Sincronização automática bloqueada: dispositivo vazio.");
-      return;
-    }
-
-    await enviarDadosNuvem(true);
-  } catch (e) {
-    console.warn("Sincronização automática falhou:", e);
-  }
+  atualizarStatusSync("Alteração salva neste aparelho. Envio automático pausado no modo recuperação.");
 }
 async function sincronizarAoAbrir() {
   if (!getSyncURL()) return;
@@ -2396,28 +2380,7 @@ async function sincronizarAoAbrir() {
   try {
     const retorno = await jsonpSync("status");
     if (retorno && retorno.ok) {
-      atualizarStatusSync("Conectado à nuvem.");
-    }
-
-    const registrosLocais = await getAll(STORE_REGISTROS);
-    const planosLocais = await getAll(STORE_PLANOS);
-
-    const devePerguntar = sessionStorage.getItem(AUTO_PULL_ASKED_KEY) !== "sim";
-    sessionStorage.setItem(AUTO_PULL_ASKED_KEY, "sim");
-
-    if (registrosLocais.length === 0 && planosLocais.length === 0) {
-      atualizarStatusSync("Aparelho vazio. Puxando dados da nuvem...");
-      await baixarDadosNuvem(true);
-      return;
-    }
-
-    if (devePerguntar) {
-      setTimeout(async () => {
-        const puxar = confirm("Deseja puxar os dados mais recentes da nuvem agora?");
-        if (puxar) {
-          await baixarDadosNuvem(false);
-        }
-      }, 700);
+      atualizarStatusSync("Conectado à nuvem. Modo recuperação ativo.");
     }
   } catch (e) {
     console.warn("Status de sincronização indisponível:", e);
