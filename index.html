@@ -1450,6 +1450,56 @@ body.dark
       }
     }
 
+  
+    .login-link-button {
+      width: 100%;
+      margin-top: 10px;
+      border: 0;
+      background: transparent;
+      color: #1d4ed8;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: none;
+      padding: 8px;
+    }
+
+    .login-link-button:hover {
+      text-decoration: underline;
+      transform: none;
+    }
+
+  
+    .report-signature {
+      text-align: center;
+      margin-top: 34px;
+      padding-top: 12px;
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .report-signature p {
+      margin: 4px 0;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .history-item {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      background: var(--card);
+    }
+
+    .history-item strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
   </style>
 </head>
 <body class="logged-out">
@@ -1471,6 +1521,7 @@ body.dark
       </div>
 
       <button class="login-button" type="button" onclick="entrarNoApp()">Entrar</button>
+      <button class="login-link-button" type="button" onclick="esqueciSenha()">Esqueci a senha</button>
 
       <p id="loginMsg" class="login-msg"></p>
       <p class="login-help">No primeiro acesso, crie seu usuário e senha.</p>
@@ -1663,6 +1714,7 @@ body.dark
       <div class="actions">
         <button class="btn-primary" onclick="gerarRelatorio()">Gerar relatório</button>
         <button class="btn-success" onclick="exportarRelatorioPDF()">Exportar PDF</button>
+        <button class="btn-secondary" type="button" onclick="abrirTela('telaHistorico')">Histórico mensal</button>
       </div>
     </section>
     <section class="card" id="printArea">
@@ -1672,6 +1724,23 @@ body.dark
     </section>
   </section>
 
+
+
+  <section id="telaPerfil" class="screen">
+    <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaConfiguracoes')">← Config.</button></div>
+    <section class="card">
+      <h2>Perfil</h2>
+      <div class="grid">
+        <div class="full"><label for="perfilProfessor">Professor</label><input id="perfilProfessor" placeholder="Nome do professor"></div>
+        <div class="full"><label for="perfilEscola">Escola</label><input id="perfilEscola" placeholder="Nome da escola"></div>
+        <div><label for="perfilAno">Ano letivo</label><input id="perfilAno" placeholder="Ex.: 2026"></div>
+        <div><label for="perfilCidade">Cidade</label><input id="perfilCidade" placeholder="Cidade"></div>
+      </div>
+      <div class="actions">
+        <button class="btn-primary" type="button" onclick="salvarPerfil()">Salvar perfil</button>
+      </div>
+    </section>
+  </section>
 
   <section id="telaConfiguracoes" class="screen">
     <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaInicio')">← Início</button></div>
@@ -1683,6 +1752,15 @@ body.dark
           <button class="btn-secondary" type="button" onclick="alternarTema()">Alterar</button>
         </div>
 
+
+        <div class="settings-item">
+          <div><strong>Perfil</strong><span>Professor, escola, ano letivo e cidade.</span></div>
+          <button class="btn-primary" type="button" onclick="abrirTela('telaPerfil')">Abrir</button>
+        </div>
+        <div class="settings-item">
+          <div><strong>Segurança</strong><span>Pergunta de recuperação de senha.</span></div>
+          <button class="btn-secondary" type="button" onclick="configurarPerguntaSeguranca()">Configurar</button>
+        </div>
         <div class="settings-item">
           <div><strong>Alterar login</strong><span>Trocar usuário e senha de acesso.</span></div>
           <button class="btn-secondary" type="button" onclick="alterarLogin()">Alterar</button>
@@ -1703,6 +1781,25 @@ body.dark
           <div><strong>Sobre</strong><span>Agenda de Aulas com banco interno IndexedDB.</span></div>
         </div>
       </div>
+    </section>
+  </section>
+
+
+  <section id="telaHistorico" class="screen">
+    <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaRelatorios')">← Relatórios</button></div>
+    <section class="card">
+      <h2>Histórico mensal</h2>
+      <div class="grid">
+        <div><label for="histMes">Mês</label><input type="month" id="histMes"></div>
+      </div>
+      <div class="actions">
+        <button class="btn-primary" type="button" onclick="gerarHistoricoMensal()">Gerar histórico</button>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Resumo</h2>
+      <div id="histResumo" class="status-box">Selecione um mês para visualizar.</div>
+      <div id="histConteudo"></div>
     </section>
   </section>
 
@@ -1874,6 +1971,174 @@ const STORE_REGISTROS = "registros";
 const STORE_PLANOS = "planejamentos";
 const LEGACY_STORAGE_KEY = "agenda_aulas_professor_v2";
 
+const PERFIL_KEY = "agenda_perfil_professor_v1";
+const SECURITY_QUESTION_KEY = "agenda_security_question_v1";
+const SECURITY_ANSWER_HASH_KEY = "agenda_security_answer_hash_v1";
+const LAST_BACKUP_KEY = "agenda_ultimo_backup_v1";
+
+function getPerfil() {
+  try {
+    return JSON.parse(localStorage.getItem(PERFIL_KEY) || "{}");
+  } catch (e) {
+    return {};
+  }
+}
+
+function carregarPerfil() {
+  const p = getPerfil();
+  if ($("perfilProfessor")) $("perfilProfessor").value = p.professor || "";
+  if ($("perfilEscola")) $("perfilEscola").value = p.escola || "";
+  if ($("perfilAno")) $("perfilAno").value = p.ano || "";
+  if ($("perfilCidade")) $("perfilCidade").value = p.cidade || "";
+}
+
+function salvarPerfil() {
+  const perfil = {
+    professor: $("perfilProfessor").value.trim(),
+    escola: $("perfilEscola").value.trim(),
+    ano: $("perfilAno").value.trim(),
+    cidade: $("perfilCidade").value.trim()
+  };
+  localStorage.setItem(PERFIL_KEY, JSON.stringify(perfil));
+  alert("Perfil salvo com sucesso.");
+}
+
+async function configurarPerguntaSeguranca() {
+  const pergunta = prompt("Digite uma pergunta de segurança. Ex.: Nome da escola?");
+  if (!pergunta) return;
+
+  const resposta = prompt("Digite a resposta secreta:");
+  if (!resposta) return;
+
+  const hash = await gerarHashLogin(resposta.trim().toLowerCase());
+  localStorage.setItem(SECURITY_QUESTION_KEY, pergunta.trim());
+  localStorage.setItem(SECURITY_ANSWER_HASH_KEY, hash);
+  alert("Pergunta de segurança configurada.");
+}
+
+async function esqueciSenha() {
+  if (!loginConfigurado()) {
+    alert("Ainda não existe login cadastrado.");
+    return;
+  }
+
+  const pergunta = localStorage.getItem(SECURITY_QUESTION_KEY);
+  const respostaHash = localStorage.getItem(SECURITY_ANSWER_HASH_KEY);
+
+  if (!pergunta || !respostaHash) {
+    alert("Nenhuma pergunta de segurança foi configurada. Entre no app e configure em Configurações.");
+    return;
+  }
+
+  const resposta = prompt(pergunta);
+  if (!resposta) return;
+
+  const hash = await gerarHashLogin(resposta.trim().toLowerCase());
+
+  if (hash !== respostaHash) {
+    alert("Resposta incorreta.");
+    return;
+  }
+
+  const novoUsuario = prompt("Digite o novo usuário:");
+  if (!novoUsuario) return;
+
+  const novaSenha = prompt("Digite a nova senha:");
+  if (!novaSenha) return;
+
+  const novoHash = await gerarHashLogin(novoUsuario.trim() + "::" + novaSenha);
+  localStorage.setItem(LOGIN_USER_KEY, novoUsuario.trim());
+  localStorage.setItem(LOGIN_HASH_KEY, novoHash);
+  alert("Login redefinido com sucesso.");
+}
+
+async function usarPlanoNoRegistro(id) {
+  const p = await getOne(STORE_PLANOS, id);
+  if (!p) return;
+
+  $("editId").value = "";
+  $("data").value = hojeISO();
+  $("aulaNumero").value = p.aulaNumero || "";
+  $("turma").value = p.turma || "";
+  atualizarDisciplinasDaTurma(p.disciplina || "");
+  await carregarPlanosParaRegistro();
+  $("planoRegistro").value = p.id;
+  $("aula").value = p.assunto || "";
+  $("conteudo").value = p.conteudo || "";
+  $("atividade").value = p.atividade || "";
+  $("pendencias").value = p.pendencias || "";
+
+  abrirTela("telaRegistro");
+}
+
+async function duplicarPlano(id) {
+  const p = await getOne(STORE_PLANOS, id);
+  if (!p) return;
+
+  const novo = {
+    ...p,
+    id: Date.now().toString(),
+    usado: false,
+    assunto: (p.assunto || "") + " (cópia)"
+  };
+
+  await put(STORE_PLANOS, novo);
+  alert("Planejamento duplicado.");
+  buscarPlanos();
+}
+
+async function alternarPlanoUsado(id) {
+  const p = await getOne(STORE_PLANOS, id);
+  if (!p) return;
+
+  p.usado = !p.usado;
+  await put(STORE_PLANOS, p);
+  buscarPlanos();
+}
+
+async function gerarHistoricoMensal() {
+  const mes = $("histMes").value;
+  if (!mes) {
+    alert("Selecione um mês.");
+    return;
+  }
+
+  const regs = (await getAll(STORE_REGISTROS)).filter(r => (r.data || "").startsWith(mes));
+  const total = regs.length;
+  const ministradas = regs.filter(r => r.status === "Ministrada").length;
+  const pendentes = regs.filter(r => r.status !== "Ministrada").length;
+
+  const porDisciplina = {};
+  regs.forEach(r => {
+    const chave = r.disciplina || "Sem disciplina";
+    porDisciplina[chave] = (porDisciplina[chave] || 0) + 1;
+  });
+
+  $("histResumo").innerHTML = `<strong>${total}</strong> registro(s) no mês. Ministradas: <strong>${ministradas}</strong>. Pendentes: <strong>${pendentes}</strong>.`;
+
+  const itens = Object.entries(porDisciplina)
+    .sort((a,b)=>b[1]-a[1])
+    .map(([disciplina, qtd]) => `<div class="history-item"><strong>${esc(disciplina)}</strong>${qtd} aula(s) registrada(s)</div>`)
+    .join("");
+
+  $("histConteudo").innerHTML = itens || '<div class="empty">Nenhum registro neste mês.</div>';
+}
+
+function verificarLembreteBackup() {
+  const ultimo = localStorage.getItem(LAST_BACKUP_KEY);
+  const agora = Date.now();
+  const seteDias = 7 * 24 * 60 * 60 * 1000;
+
+  if (!ultimo || agora - Number(ultimo) > seteDias) {
+    setTimeout(() => {
+      if (document.body.classList.contains("logged-in")) {
+        alert("Lembrete: faça um backup JSON dos seus dados.");
+      }
+    }, 1200);
+  }
+}
+
+
 const disciplinasPorTurma = {
   "1 ano de programação de jogos": ["Arte Digital","Game Design","Lógica de Programação e Motores 2D","Arquitetura de Sistemas"],
   "1 ano de desenvolvimento de sistemas": ["Arquitetura de Computadores e Redes","Modelagem de Banco de Dados","Métodos Ágeis de Desenvolvimento"]
@@ -1893,6 +2158,7 @@ function abrirTela(id){
   $(id).classList.add("active");
   atualizarMenuRodape(id);
   if(id==="telaInicio") atualizarDashboard();
+  if(id==="telaPerfil") carregarPerfil();
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
@@ -1906,6 +2172,8 @@ function atualizarMenuRodape(id){
     telaPlanejamento: "navPlanejar",
     telaRelatorios: "navRelatorio",
     telaConfiguracoes: "navConfig",
+    telaPerfil: "navConfig",
+    telaHistorico: "navRelatorio",
     telaBackup: "navConfig"
   };
   const nav = mapa[id] ? $(mapa[id]) : null;
@@ -1998,6 +2266,19 @@ document.getElementById("formAgenda").addEventListener("submit", async e => {
     observacoes: $("observacoes").value.trim(),
     status: antigo?.status || "Pendente"
   };
+  if (!editId) {
+    const existentes = await getAll(STORE_REGISTROS);
+    const duplicado = existentes.some(r =>
+      r.data === registro.data &&
+      r.turma === registro.turma &&
+      r.disciplina === registro.disciplina &&
+      (r.aula || "").toLowerCase().trim() === (registro.aula || "").toLowerCase().trim()
+    );
+    if (duplicado && !confirm("Já existe uma aula parecida cadastrada. Deseja salvar mesmo assim?")) {
+      return;
+    }
+  }
+
   await put(STORE_REGISTROS, registro);  limparFormulario();
   await atualizarDashboard();
   alert("Registro salvo com sucesso!");
@@ -2198,8 +2479,10 @@ function aplicarPeriodoRapido(prefixo){
 $("formPlano").addEventListener("submit", async e=>{
   e.preventDefault();
   const id = $("planoId").value || Date.now().toString();
+  const planoAntigo = id ? await getOne(STORE_PLANOS, id) : null;
   const plano = {
     id,
+    usado: planoAntigo?.usado || false,
     bimestre: $("planoBimestre").value,
     semana: $("planoSemana").value,
     aulaNumero: $("planoAulaNumero").value.trim(),
@@ -2232,11 +2515,14 @@ async function buscarPlanos(){
   $("listaPlanos").innerHTML = planos.length ? planos.map(p=>`<article class="registro">
     <div class="meta">${esc(p.bimestre)} • Semana ${esc(p.semana||"-")} ${p.aulaNumero? "• "+esc(p.aulaNumero):""}</div>
     <h3>${esc(p.assunto)}</h3>
-    <p><span class="tag">${esc(p.disciplina)}</span><span class="tag">${esc(p.turma)}</span></p>
+    <p><span class="tag">${esc(p.disciplina)}</span><span class="tag">${esc(p.turma)}</span><span class="tag ${p.usado ? "tag-success" : "tag-warning"}">${p.usado ? "Usado" : "Não usado"}</span></p>
     <p><strong>Conteúdo:</strong> ${esc(p.conteudo)||"-"}</p>
     <p><strong>Atividade:</strong> ${esc(p.atividade)||"-"}</p>
     <div class="actions">
+      <button class="btn-success" onclick="usarPlanoNoRegistro('${p.id}')">Usar no registro</button>
       <button class="btn-secondary" onclick="editarPlano('${p.id}')">Editar</button>
+      <button class="btn-warning" onclick="duplicarPlano('${p.id}')">Duplicar</button>
+      <button class="btn-secondary" onclick="alternarPlanoUsado('${p.id}')">${p.usado ? "Marcar não usado" : "Marcar usado"}</button>
       <button class="btn-danger" onclick="excluirPlano('${p.id}')">Excluir</button>
     </div>
   </article>`).join("") : '<div class="empty">Nenhum planejamento encontrado.</div>';
@@ -2277,7 +2563,11 @@ async function gerarRelatorio(){
   $("relConteudo").innerHTML = regs.length ? `
     <div class="report-header">
       <h3>Relatório de Aulas</h3>
-      <p><strong>Turma:</strong> ${esc(turma || "Todas")}<br>
+      <p><strong>Escola:</strong> ${esc(getPerfil().escola || "Não informado")}<br>
+      <strong>Professor:</strong> ${esc(getPerfil().professor || "Não informado")}<br>
+      <strong>Ano letivo:</strong> ${esc(getPerfil().ano || "Não informado")}<br>
+      <strong>Cidade:</strong> ${esc(getPerfil().cidade || "Não informado")}<br>
+      <strong>Turma:</strong> ${esc(turma || "Todas")}<br>
       <strong>Disciplina:</strong> ${esc(disciplina || "Todas")}<br>
       <strong>Período:</strong> ${de ? formatarData(de) : "início"} até ${ate ? formatarData(ate) : "fim"}</p>
       <div class="report-summary">
@@ -2293,7 +2583,7 @@ async function gerarRelatorio(){
     <p><strong>Conteúdo:</strong> ${esc(r.conteudo)||"-"}</p>
     <p><strong>Atividade:</strong> ${esc(r.atividade)||"-"}</p>
     <p><strong>Pendências:</strong> ${esc(r.pendencias)||"-"}</p>
-  </article>`).join("") : '<div class="empty">Nenhum registro para o relatório.</div>';
+  </article>`).join("") + `<div class="report-signature"><p>________________________________________</p><p>${esc(getPerfil().professor || "Professor")}</p></div>` : '<div class="empty">Nenhum registro para o relatório.</div>';
 }
 
 function exportarRelatorioPDF(){
@@ -2344,6 +2634,7 @@ async function exportarBackupJSON(){
   const registros = await getAll(STORE_REGISTROS);
   const planejamentos = await getAll(STORE_PLANOS);
   baixarArquivo("backup-agenda-aulas.json", JSON.stringify({registros, planejamentos}, null, 2), "application/json");
+  localStorage.setItem(LAST_BACKUP_KEY, String(Date.now()));
 }
 
 function importarBackupJSON(ev){
@@ -2410,6 +2701,7 @@ async function iniciarApp(){
   renderizarResultados();
   atualizarMenuRodape("telaInicio");
   await atualizarDashboard();
+  verificarLembreteBackup();
 }
 
 iniciarApp();
