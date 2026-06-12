@@ -1511,63 +1511,6 @@ body.dark
       background: linear-gradient(180deg, rgba(15,23,42,0.98), rgba(30,41,59,0.98));
     }
 
-  
-    .activity-summary-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 14px;
-      overflow: hidden;
-      border-radius: 14px;
-    }
-
-    .activity-summary-table th,
-    .activity-summary-table td {
-      border: 1px solid var(--border);
-      padding: 10px;
-      text-align: left;
-      font-size: 13px;
-    }
-
-    .activity-summary-table th {
-      background: rgba(37,99,235,0.10);
-      color: var(--text);
-      font-weight: 900;
-    }
-
-    .activity-total-box {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin: 14px 0;
-    }
-
-    .activity-total-box div {
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 12px;
-      background: var(--card);
-      text-align: center;
-      font-weight: 900;
-    }
-
-    .activity-total-box span {
-      display: block;
-      font-size: 22px;
-      margin-bottom: 4px;
-    }
-
-    @media (max-width: 560px) {
-      .activity-total-box {
-        grid-template-columns: 1fr;
-      }
-
-      .activity-summary-table th,
-      .activity-summary-table td {
-        font-size: 12px;
-        padding: 8px;
-      }
-    }
-
   </style>
 </head>
 <body class="logged-out">
@@ -1666,31 +1609,6 @@ body.dark
             <div class="full"><label for="aula">Aula/tema</label><input type="text" id="aula" placeholder="Ex.: Normalização" required></div>
             <div class="full"><label for="conteudo">Conteúdo ministrado</label><textarea id="conteudo" placeholder="Conteúdo trabalhado na aula" required></textarea></div>
             <div class="full"><label for="atividade">Atividade realizada</label><textarea id="atividade" placeholder="Atividade aplicada"></textarea></div>
-        <div>
-          <label for="atividadeFeita">Atividade feita?</label>
-          <select id="atividadeFeita">
-            <option value="Não">Não</option>
-            <option value="Sim">Sim</option>
-          </select>
-        </div>
-        <div>
-          <label for="tipoAtividadeFeita">Tipo de atividade</label>
-          <select id="tipoAtividadeFeita">
-            <option value="">Selecione</option>
-            <option>Exercício no caderno</option>
-            <option>Atividade prática no computador</option>
-            <option>Trabalho em grupo</option>
-            <option>Pesquisa</option>
-            <option>Apresentação</option>
-            <option>Simulado/Avaliação</option>
-            <option>Projeto</option>
-            <option>Outro</option>
-          </select>
-        </div>
-        <div>
-          <label for="quantidadeAtividades">Quantidade</label>
-          <input type="number" id="quantidadeAtividades" min="0" value="0" placeholder="Ex.: 1">
-        </div>
           </div>
         </div>
 
@@ -1808,7 +1726,6 @@ body.dark
         <button class="btn-primary" onclick="gerarRelatorio()">Gerar relatório</button>
         <button class="btn-success" onclick="exportarRelatorioPDF()">Exportar PDF</button>
         <button class="btn-secondary" type="button" onclick="abrirTela('telaHistorico')">Histórico mensal</button>
-        <button class="btn-warning" type="button" onclick="abrirTela('telaAtividadesPeriodo')">Atividades por disciplina</button>
       </div>
     </section>
     <section class="card" id="printArea">
@@ -1914,51 +1831,6 @@ body.dark
       <div class="actions">
         <button class="btn-secondary" type="button" onclick="ativarPerguntaAoAbrir()">Perguntar ao abrir novamente</button>
       </div>
-    </section>
-  </section>
-
-
-  <section id="telaAtividadesPeriodo" class="screen">
-    <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaRelatorios')">← Relatórios</button></div>
-    <section class="card">
-      <h2>Atividades por disciplina</h2>
-      <div class="status-box">
-        Gere um resumo para saber quantas atividades foram feitas em cada disciplina dentro de um período.
-      </div>
-      <div class="grid">
-        <div>
-          <label for="ativDe">Data inicial</label>
-          <input type="date" id="ativDe">
-        </div>
-        <div>
-          <label for="ativAte">Data final</label>
-          <input type="date" id="ativAte">
-        </div>
-        <div>
-          <label for="ativTurma">Turma</label>
-          <select id="ativTurma">
-            <option value="">Todas</option>
-            <option>1 ano de programação de jogos</option>
-            <option>1 ano de desenvolvimento de sistemas</option>
-          </select>
-        </div>
-        <div>
-          <label for="ativDisciplina">Disciplina</label>
-          <select id="ativDisciplina">
-            <option value="">Todas</option>
-          </select>
-        </div>
-      </div>
-      <div class="actions">
-        <button class="btn-primary" type="button" onclick="gerarRelatorioAtividades()">Gerar resumo</button>
-        <button class="btn-success" type="button" onclick="exportarAtividadesPDF()">Exportar PDF</button>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>Resultado</h2>
-      <div id="ativResumo" class="status-box">Selecione o período e clique em gerar.</div>
-      <div id="ativResultado"></div>
     </section>
   </section>
 
@@ -2526,122 +2398,6 @@ function ativarPerguntaAoAbrir() {
   alert("Pronto. Na próxima abertura do app, ele perguntará se deseja puxar os dados da nuvem.");
 }
 
-
-let ultimoRelatorioAtividades = [];
-
-function atualizarDisciplinasAtividades() {
-  const turma = $("ativTurma")?.value || "";
-  const sel = $("ativDisciplina");
-  if (!sel) return;
-
-  const atual = sel.value;
-  sel.innerHTML = '<option value="">Todas</option>';
-
-  let lista = [];
-  if (turma && DISCIPLINAS[turma]) {
-    lista = DISCIPLINAS[turma];
-  } else {
-    lista = Object.values(DISCIPLINAS).flat();
-  }
-
-  [...new Set(lista)].forEach(d => {
-    const opt = document.createElement("option");
-    opt.value = d;
-    opt.textContent = d;
-    sel.appendChild(opt);
-  });
-
-  if ([...sel.options].some(o => o.value === atual)) sel.value = atual;
-}
-
-async function gerarRelatorioAtividades() {
-  const de = $("ativDe").value;
-  const ate = $("ativAte").value;
-  const turma = $("ativTurma").value;
-  const disciplina = $("ativDisciplina").value;
-
-  let registros = await getAll(STORE_REGISTROS);
-
-  registros = registros.filter(r => {
-    if (de && r.data < de) return false;
-    if (ate && r.data > ate) return false;
-    if (turma && r.turma !== turma) return false;
-    if (disciplina && r.disciplina !== disciplina) return false;
-    return true;
-  });
-
-  const feitas = registros.filter(r => (r.atividadeFeita || "Não") === "Sim" || Number(r.quantidadeAtividades || 0) > 0);
-
-  const porDisciplina = {};
-  feitas.forEach(r => {
-    const disc = r.disciplina || "Sem disciplina";
-    const qtd = Math.max(1, Number(r.quantidadeAtividades || 1));
-    if (!porDisciplina[disc]) {
-      porDisciplina[disc] = {
-        disciplina: disc,
-        aulasComAtividade: 0,
-        totalAtividades: 0,
-        tipos: {}
-      };
-    }
-    porDisciplina[disc].aulasComAtividade += 1;
-    porDisciplina[disc].totalAtividades += qtd;
-    const tipo = r.tipoAtividadeFeita || "Não informado";
-    porDisciplina[disc].tipos[tipo] = (porDisciplina[disc].tipos[tipo] || 0) + qtd;
-  });
-
-  ultimoRelatorioAtividades = Object.values(porDisciplina).sort((a,b)=>b.totalAtividades-a.totalAtividades);
-
-  const totalAulas = registros.length;
-  const totalAulasComAtividade = feitas.length;
-  const totalAtividades = feitas.reduce((s,r)=>s + Math.max(1, Number(r.quantidadeAtividades || 1)), 0);
-
-  $("ativResumo").innerHTML = `
-    <div class="activity-total-box">
-      <div><span>${totalAulas}</span>Aulas no período</div>
-      <div><span>${totalAulasComAtividade}</span>Aulas com atividade</div>
-      <div><span>${totalAtividades}</span>Atividades feitas</div>
-    </div>
-  `;
-
-  if (ultimoRelatorioAtividades.length === 0) {
-    $("ativResultado").innerHTML = '<div class="empty">Nenhuma atividade marcada nesse período.</div>';
-    return;
-  }
-
-  const linhas = ultimoRelatorioAtividades.map(item => {
-    const tipos = Object.entries(item.tipos).map(([tipo,qtd]) => `${esc(tipo)}: ${qtd}`).join("<br>");
-    return `<tr>
-      <td>${esc(item.disciplina)}</td>
-      <td>${item.aulasComAtividade}</td>
-      <td>${item.totalAtividades}</td>
-      <td>${tipos || "-"}</td>
-    </tr>`;
-  }).join("");
-
-  $("ativResultado").innerHTML = `
-    <table class="activity-summary-table">
-      <thead>
-        <tr>
-          <th>Disciplina</th>
-          <th>Aulas com atividade</th>
-          <th>Total de atividades</th>
-          <th>Tipos</th>
-        </tr>
-      </thead>
-      <tbody>${linhas}</tbody>
-    </table>
-  `;
-}
-
-function exportarAtividadesPDF() {
-  if (!ultimoRelatorioAtividades.length) {
-    alert("Gere o resumo de atividades primeiro.");
-    return;
-  }
-  window.print();
-}
-
 function verificarLembreteBackup() {
   const ultimo = localStorage.getItem(LAST_BACKUP_KEY);
   const agora = Date.now();
@@ -2678,7 +2434,6 @@ function abrirTela(id){
   if(id==="telaInicio") { atualizarDashboard(); atualizarCardNuvemInicio(); }
   if(id==="telaPerfil") carregarPerfil();
   if(id==="telaSincronizacao") carregarURLSync();
-  if(id==="telaAtividadesPeriodo") atualizarDisciplinasAtividades();
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
@@ -2695,7 +2450,6 @@ function atualizarMenuRodape(id){
     telaPerfil: "navConfig",
     telaSincronizacao: "navConfig",
     telaHistorico: "navRelatorio",
-    telaAtividadesPeriodo: "navRelatorio",
     telaBackup: "navConfig"
   };
   const nav = mapa[id] ? $(mapa[id]) : null;
@@ -2784,9 +2538,6 @@ document.getElementById("formAgenda").addEventListener("submit", async e => {
     aula: $("aula").value.trim(),
     conteudo: $("conteudo").value.trim(),
     atividade: $("atividade").value.trim(),
-    atividadeFeita: $("atividadeFeita")?.value || "Não",
-    tipoAtividadeFeita: $("tipoAtividadeFeita")?.value || "",
-    quantidadeAtividades: Number($("quantidadeAtividades")?.value || 0),
     pendencias: $("pendencias").value.trim(),
     observacoes: $("observacoes").value.trim(),
     status: antigo?.status || "Pendente"
@@ -2901,7 +2652,6 @@ function cardRegistro(r){
     <p><span class="tag">${esc(r.disciplina)}</span><span class="tag">${esc(r.turma)}</span><span class="tag ${r.status==="Ministrada"?"tag-success":"tag-warning"}">${r.status==="Ministrada"?"Aula ministrada":"Aula pendente"}</span></p>
     <p><strong>Conteúdo:</strong> ${esc(r.conteudo)||"-"}</p>
     <p><strong>Atividade:</strong> ${esc(r.atividade)||"-"}</p>
-    <p><strong>Atividade feita:</strong> <span class="tag ${r.atividadeFeita === "Sim" ? "tag-success" : "tag-warning"}">${esc(r.atividadeFeita || "Não")}</span> ${r.atividadeFeita === "Sim" ? `<span class="tag">${esc(r.tipoAtividadeFeita || "Atividade")}</span> <span class="tag">${Number(r.quantidadeAtividades || 1)} feita(s)</span>` : ""}</p>
     <p><strong>Pendências:</strong> ${esc(r.pendencias)||"-"}</p>
     <p><strong>Observações:</strong> ${esc(r.observacoes)||"-"}</p>
     <div class="actions">
@@ -3230,10 +2980,6 @@ async function iniciarApp(){
   atualizarMenuRodape("telaInicio");
   await atualizarDashboard();
   await atualizarCardNuvemInicio();
-  if ($("ativTurma")) {
-    atualizarDisciplinasAtividades();
-    $("ativTurma").addEventListener("change", atualizarDisciplinasAtividades);
-  }
   verificarLembreteBackup();
   carregarURLSync();
   sincronizarAoAbrir();
