@@ -2563,55 +2563,58 @@ function forceDockLayout() {
 
   const mobile = window.innerWidth <= 560;
   const desktopWidth = Math.min(1080, window.innerWidth - 40);
-  const mobileWidth = window.innerWidth - 16;
+  const mobileWidth = window.innerWidth - 10;
 
-  document.body.style.paddingBottom = mobile ? '170px' : '138px';
+  document.body.style.paddingBottom = mobile ? '88px' : '138px';
   const main = document.querySelector('main');
-  if (main) main.style.paddingBottom = mobile ? '170px' : '138px';
+  if (main) main.style.paddingBottom = mobile ? '88px' : '138px';
 
   Object.assign(dock.style, {
     position: 'fixed',
-    left: mobile ? '8px' : '50%',
-    right: mobile ? '8px' : 'auto',
+    left: mobile ? '5px' : '50%',
+    right: mobile ? '5px' : 'auto',
     transform: mobile ? 'none' : 'translateX(-50%)',
-    bottom: mobile ? '8px' : '14px',
+    bottom: mobile ? '6px' : '14px',
     width: (mobile ? mobileWidth : desktopWidth) + 'px',
     zIndex: '2147483647',
     display: 'grid',
-    gridTemplateColumns: mobile ? 'repeat(2, 1fr)' : 'repeat(6, 1fr)',
-    gap: mobile ? '6px' : '10px',
-    padding: mobile ? '8px' : '10px 12px',
+    gridTemplateColumns: 'repeat(6, 1fr)',
+    gap: mobile ? '4px' : '10px',
+    padding: mobile ? '6px' : '10px 12px',
     margin: '0',
     background: document.body.classList.contains('dark') ? 'rgba(15,23,42,0.98)' : 'rgba(255,255,255,0.98)',
     border: document.body.classList.contains('dark') ? '1px solid rgba(96,165,250,0.32)' : '1px solid rgba(37,99,235,0.22)',
-    borderRadius: '24px',
+    borderRadius: mobile ? '18px' : '24px',
     boxShadow: '0 18px 40px rgba(15,23,42,0.20)',
     backdropFilter: 'blur(16px)',
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
+    alignItems: 'stretch'
   });
 
   const buttons = dock.querySelectorAll('button');
   buttons.forEach(btn => {
     Object.assign(btn.style, {
       display: 'flex',
+      flexDirection: mobile ? 'column' : 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: mobile ? '6px' : '7px',
-      minHeight: mobile ? '46px' : '50px',
+      gap: mobile ? '2px' : '7px',
+      minHeight: mobile ? '40px' : '50px',
       width: '100%',
-      padding: mobile ? '6px 8px' : '8px 10px',
-      borderRadius: '16px',
+      padding: mobile ? '4px 2px' : '8px 10px',
+      borderRadius: mobile ? '12px' : '16px',
       background: document.body.classList.contains('dark') ? '#1e293b' : '#ffffff',
       color: '#0f172a',
       border: document.body.classList.contains('dark') ? '1px solid #475569' : '1px solid #dbe2ea',
       boxShadow: '0 6px 14px rgba(15,23,42,0.10)',
-      fontSize: mobile ? '15px' : '16px',
+      fontSize: mobile ? '13px' : '16px',
       fontWeight: '800',
       lineHeight: '1',
       whiteSpace: 'nowrap',
       boxSizing: 'border-box',
       cursor: 'pointer',
-      fontFamily: '"Segoe UI", Arial, sans-serif'
+      fontFamily: '"Segoe UI", Arial, sans-serif',
+      overflow: 'hidden'
     });
     if (document.body.classList.contains('dark')) {
       btn.style.color = '#ffffff';
@@ -2619,12 +2622,15 @@ function forceDockLayout() {
     const span = btn.querySelector('span');
     if (span) {
       Object.assign(span.style, {
-        fontSize: mobile ? '11px' : '12px',
+        fontSize: mobile ? '8px' : '12px',
         fontWeight: '800',
         lineHeight: '1',
         whiteSpace: 'nowrap',
         display: 'inline-block',
-        color: 'inherit'
+        color: 'inherit',
+        maxWidth: '100%',
+        overflow: 'hidden',
+        textOverflow: 'clip'
       });
     }
     if (btn.classList.contains('active')) {
