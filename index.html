@@ -1500,6 +1500,17 @@ body.dark
       margin-bottom: 4px;
     }
 
+  
+    .sync-home-card {
+      margin-top: 14px;
+      border: 1px solid rgba(37,99,235,0.22);
+      background: linear-gradient(180deg, rgba(239,246,255,0.95), rgba(255,255,255,0.98));
+    }
+
+    body.dark .sync-home-card {
+      background: linear-gradient(180deg, rgba(15,23,42,0.98), rgba(30,41,59,0.98));
+    }
+
   </style>
 </head>
 <body class="logged-out">
@@ -2020,6 +2031,29 @@ function getDeviceId() {
   return id;
 }
 
+
+async function atualizarCardNuvemInicio() {
+  const box = $("syncHomeStatus");
+  const card = $("cardNuvemInicio");
+  if (!box || !card) return;
+
+  const regs = await getAll(STORE_REGISTROS);
+  const planos = await getAll(STORE_PLANOS);
+  const url = getSyncURL();
+
+  if (!url) {
+    box.innerHTML = "A sincronização ainda não foi configurada neste dispositivo. Clique em <strong>Configurar sincronização</strong>, cole a URL do Web App e depois puxe os dados.";
+    return;
+  }
+
+  if (regs.length === 0 && planos.length === 0) {
+    box.innerHTML = "Este dispositivo está vazio. Clique em <strong>Puxar dados da nuvem</strong> para carregar os registros enviados pelo celular.";
+    return;
+  }
+
+  box.innerHTML = `Este dispositivo possui <strong>${regs.length}</strong> registro(s) e <strong>${planos.length}</strong> planejamento(s).`;
+}
+
 function carregarURLSync() {
   const input = $("syncUrl");
   if (input) input.value = localStorage.getItem(SYNC_URL_KEY) || "";
@@ -2035,6 +2069,7 @@ async function salvarURLSync() {
 
   localStorage.setItem(SYNC_URL_KEY, url);
   atualizarStatusSync("URL salva.");
+  atualizarCardNuvemInicio();
 
   if (confirm("URL salva. Deseja puxar os dados da nuvem agora?")) {
     await baixarDadosNuvem(false);
@@ -2224,6 +2259,7 @@ async function baixarDadosNuvem(modoAutomatico = false) {
     renderizarResultados();
     await atualizarDashboard();
     atualizarStatusSync(`Dados puxados com sucesso: ${registros.length} registro(s).`);
+    atualizarCardNuvemInicio();
 
     if (!modoAutomatico) {
       alert("Dados puxados da nuvem com sucesso.");
@@ -2231,7 +2267,7 @@ async function baixarDadosNuvem(modoAutomatico = false) {
   } catch (erro) {
     atualizarStatusSync("Erro ao puxar dados.");
     if (!modoAutomatico) {
-      alert("Erro ao puxar dados: " + erro.message);
+      alert("Erro ao puxar dados: " + erro.message + "\n\nConfira se a URL do Web App foi colada em Config. > Sincronização.");
     } else {
       console.warn("Puxar automático falhou:", erro);
     }
@@ -2461,7 +2497,7 @@ function abrirTela(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   $(id).classList.add("active");
   atualizarMenuRodape(id);
-  if(id==="telaInicio") atualizarDashboard();
+  if(id==="telaInicio") { atualizarDashboard(); atualizarCardNuvemInicio(); }
   if(id==="telaPerfil") carregarPerfil();
   if(id==="telaSincronizacao") carregarURLSync();
   window.scrollTo({top:0,behavior:"smooth"});
@@ -3009,6 +3045,7 @@ async function iniciarApp(){
   renderizarResultados();
   atualizarMenuRodape("telaInicio");
   await atualizarDashboard();
+  await atualizarCardNuvemInicio();
   verificarLembreteBackup();
   carregarURLSync();
   sincronizarAoAbrir();
