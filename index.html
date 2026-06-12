@@ -2047,29 +2047,102 @@ function atualizarStatusSync(texto = "") {
   box.textContent = texto || (url ? "Sincronização configurada." : "Sincronização não configurada.");
 }
 
-async function chamarSync(payload) {
-  const url = getSyncURL();
-  if (!url) {
-    alert("Configure a URL de sincronização primeiro.");
-    abrirTela("telaSincronizacao");
-    return null;
-  }
+function jsonpSync(action, extra = {}) {
+  return new Promise((resolve, reject) => {
+    const url = getSyncURL();
 
-  atualizarStatusSync("Conectando à nuvem...");
+    if (!url) {
+      reject(new Error("URL de sincronização não configurada."));
+      return;
+    }
 
-  const resposta = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(payload)
+    const callbackName = "agendaSyncCallback_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+    const script = document.createElement("script");
+
+    const params = new URLSearchParams({
+      action,
+      callback: callbackName,
+      deviceId: getDeviceId(),
+      ...extra
+    });
+
+    window[callbackName] = function(data) {
+      cleanup();
+      resolve(data);
+    };
+
+    function cleanup() {
+      try { delete window[callbackName]; } catch(e) { window[callbackName] = undefined; }
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    script.onerror = function() {
+      cleanup();
+      reject(new Error("Não foi possível conectar ao Apps Script."));
+    };
+
+    script.src = url + (url.includes("?") ? "&" : "?") + params.toString();
+    document.body.appendChild(script);
+
+    setTimeout(() => {
+      if (window[callbackName]) {
+        cleanup();
+        reject(new Error("Tempo de conexão esgotado."));
+      }
+    }, 20000);
   });
+}
 
-  const texto = await resposta.text();
+function postOcultoSync(payload) {
+  return new Promise((resolve, reject) => {
+    const url = getSyncURL();
 
-  try {
-    return JSON.parse(texto);
-  } catch (e) {
-    throw new Error("Resposta inválida do servidor: " + texto.slice(0, 120));
-  }
+    if (!url) {
+      reject(new Error("URL de sincronização não configurada."));
+      return;
+    }
+
+    const frameName = "syncFrame_" + Date.now();
+    const iframe = document.createElement("iframe");
+    iframe.name = frameName;
+    iframe.style.display = "none";
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = url;
+    form.target = frameName;
+    form.style.display = "none";
+
+    const input = document.createElement("textarea");
+    input.name = "payload";
+    input.value = JSON.stringify(payload);
+
+    form.appendChild(input);
+    document.body.appendChild(iframe);
+    document.body.appendChild(form);
+
+    let finalizado = false;
+
+    iframe.onload = function() {
+      if (finalizado) return;
+      finalizado = true;
+      setTimeout(() => {
+        form.remove();
+        iframe.remove();
+      }, 500);
+      resolve({ ok: true });
+    };
+
+    form.submit();
+
+    setTimeout(() => {
+      if (!finalizado) {
+        finalizado = true;
+        try { form.remove(); iframe.remove(); } catch(e) {}
+        reject(new Error("Tempo de envio esgotado."));
+      }
+    }, 20000);
+  });
 }
 
 async function enviarDadosNuvem() {
@@ -2078,19 +2151,17 @@ async function enviarDadosNuvem() {
     const planejamentos = await getAll(STORE_PLANOS);
     const perfil = getPerfil();
 
-    const retorno = await chamarSync({
+    atualizarStatusSync("Enviando dados para a nuvem...");
+
+    await postOcultoSync({
       action: "pushAll",
       deviceId: getDeviceId(),
       updatedAt: new Date().toISOString(),
       data: { registros, planejamentos, perfil }
     });
 
-    if (retorno && retorno.ok) {
-      atualizarStatusSync("Dados enviados com sucesso.");
-      alert("Dados enviados para a nuvem.");
-    } else {
-      throw new Error(retorno?.error || "Falha ao enviar.");
-    }
+    atualizarStatusSync("Dados enviados. Aguarde alguns segundos e puxe no outro dispositivo.");
+    alert("Dados enviados para a nuvem.");
   } catch (erro) {
     atualizarStatusSync("Erro ao enviar dados.");
     alert("Erro ao enviar dados: " + erro.message);
@@ -2099,10 +2170,9 @@ async function enviarDadosNuvem() {
 
 async function baixarDadosNuvem() {
   try {
-    const retorno = await chamarSync({
-      action: "pullAll",
-      deviceId: getDeviceId()
-    });
+    atualizarStatusSync("Puxando dados da nuvem...");
+
+    const retorno = await jsonpSync("pullAll");
 
     if (!retorno || !retorno.ok) {
       throw new Error(retorno?.error || "Falha ao puxar dados.");
@@ -2164,7 +2234,7 @@ async function sincronizarAoSalvar() {
 async function sincronizarAoAbrir() {
   if (!getSyncURL()) return;
   try {
-    const retorno = await chamarSync({ action: "status", deviceId: getDeviceId() });
+    const retorno = await jsonpSync("status");
     if (retorno && retorno.ok) {
       atualizarStatusSync("Conectado à nuvem.");
     }
