@@ -2025,6 +2025,37 @@ const SECURITY_QUESTION_KEY = "agenda_security_question_v1";
 const SECURITY_ANSWER_HASH_KEY = "agenda_security_answer_hash_v1";
 const LAST_BACKUP_KEY = "agenda_ultimo_backup_v1";
 
+
+const PERFIL_KEY = "agenda_perfil_professor_v1";
+
+function getPerfil() {
+  try {
+    return JSON.parse(localStorage.getItem(PERFIL_KEY) || "{}");
+  } catch (e) {
+    return {};
+  }
+}
+
+function carregarPerfil() {
+  const p = getPerfil();
+  if ($("perfilProfessor")) $("perfilProfessor").value = p.professor || "";
+  if ($("perfilEscola")) $("perfilEscola").value = p.escola || "";
+  if ($("perfilAno")) $("perfilAno").value = p.ano || "";
+  if ($("perfilCidade")) $("perfilCidade").value = p.cidade || "";
+}
+
+function salvarPerfil() {
+  const perfil = {
+    professor: $("perfilProfessor") ? $("perfilProfessor").value.trim() : "",
+    escola: $("perfilEscola") ? $("perfilEscola").value.trim() : "",
+    ano: $("perfilAno") ? $("perfilAno").value.trim() : "",
+    cidade: $("perfilCidade") ? $("perfilCidade").value.trim() : ""
+  };
+  localStorage.setItem(PERFIL_KEY, JSON.stringify(perfil));
+  if (typeof sincronizarAoSalvar === "function") sincronizarAoSalvar();
+  alert("Perfil salvo com sucesso.");
+}
+
 const SYNC_URL_KEY = "agenda_sync_url_v1";
 const DEVICE_ID_KEY = "agenda_device_id_v1";
 const AUTO_PULL_ASKED_KEY = "agenda_auto_pull_asked_v1";
@@ -2213,7 +2244,7 @@ async function enviarDadosNuvem(silencioso = false) {
   try {
     const registros = await getAll(STORE_REGISTROS);
     const planejamentos = await getAll(STORE_PLANOS);
-    const perfil = getPerfil();
+    const perfil = (typeof getPerfil === "function") ? getPerfil() : {};
 
     if (registros.length === 0 && planejamentos.length === 0) {
       if (!silencioso) {
