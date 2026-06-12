@@ -1785,6 +1785,11 @@ body.dark
           <div><strong>Sincronização</strong><span>Puxar dados de outro dispositivo usando Google Sheets.</span></div>
           <button class="btn-primary" type="button" onclick="abrirTela('telaSincronizacao')">Abrir</button>
         </div>
+
+        <div class="settings-item">
+          <div><strong>Recuperar dados locais</strong><span>Tenta localizar registros salvos neste navegador.</span></div>
+          <button class="btn-warning" type="button" onclick="recuperarDadosLocaisEmergencia()">Recuperar</button>
+        </div>
         <div class="settings-item">
           <div><strong>Backup</strong><span>Exportar, importar ou recuperar dados.</span></div>
           <button class="btn-primary" type="button" onclick="abrirTela('telaBackup')">Abrir</button>
@@ -1806,9 +1811,6 @@ body.dark
     <div class="top-back"><button class="btn-secondary" onclick="abrirTela('telaConfiguracoes')">← Config.</button></div>
     <section class="card">
       <h2>Sincronização</h2>
-      <div class="status-box" style="border-color:#f59e0b;background:rgba(245,158,11,.12);">
-        <strong>Modo recuperação:</strong> esta versão não apaga dados locais ao puxar da nuvem. Ela mescla os registros encontrados na planilha com o banco deste aparelho.
-      </div>
       <div class="status-box">
         Cole aqui a URL do Web App. Depois clique em <strong>Puxar dados</strong> para carregar no computador os registros enviados pelo celular.
       </div>
@@ -1829,10 +1831,7 @@ body.dark
 
       <div id="syncStatus" class="status-box" style="margin-top:14px;">Sincronização não configurada.</div>
       <div class="status-box" style="margin-top:10px;">
-        <strong>Modo recuperação ativo:</strong> ao abrir o app, ele pergunta se deseja puxar dados da nuvem. Ao salvar aula, planejamento ou perfil, ele envia em segundo plano sem mostrar alerta.
-      </div>
-      <div class="actions">
-        <button class="btn-secondary" type="button" onclick="ativarPerguntaAoAbrir()">Perguntar ao abrir novamente</button>
+        <strong>Atenção:</strong> em aparelho novo ou vazio, use primeiro <strong>Puxar dados</strong>. O envio vazio agora fica bloqueado para proteger a planilha.
       </div>
     </section>
   </section>
@@ -2014,6 +2013,51 @@ window.addEventListener("load", () => {
     if (e.key === "Enter") entrarNoApp();
   });
 });
+
+async function recuperarDadosLocaisEmergencia() {
+  try {
+    let encontrados = 0;
+
+    // 1) Recuperar formato antigo localStorage
+    const chavesPossiveis = [
+      "agenda_aulas_professor_v2",
+      "registros",
+      "aulas",
+      "agenda_registros"
+    ];
+
+    for (const chave of chavesPossiveis) {
+      const bruto = localStorage.getItem(chave);
+      if (!bruto) continue;
+
+      try {
+        const dados = JSON.parse(bruto);
+        const lista = Array.isArray(dados) ? dados : (dados.registros || dados.aulas || []);
+        if (Array.isArray(lista)) {
+          for (const r of lista) {
+            if (!r.id) r.id = Date.now().toString() + Math.random().toString(16).slice(2);
+            if (!r.status) r.status = "Pendente";
+            await put(STORE_REGISTROS, r);
+            encontrados++;
+          }
+        }
+      } catch(e) {}
+    }
+
+    // 2) Atualizar tela
+    await atualizarDashboard();
+    renderizarResultados();
+
+    if (encontrados > 0) {
+      alert("Recuperação concluída. Registros recuperados: " + encontrados);
+    } else {
+      alert("Não encontrei registros antigos no armazenamento local deste navegador. Se eles estavam na planilha, use Config. > Sincronização > Puxar dados.");
+    }
+  } catch (e) {
+    alert("Erro na recuperação local: " + e.message);
+  }
+}
+
 </script>
 
 <script>
@@ -2028,40 +2072,8 @@ const SECURITY_QUESTION_KEY = "agenda_security_question_v1";
 const SECURITY_ANSWER_HASH_KEY = "agenda_security_answer_hash_v1";
 const LAST_BACKUP_KEY = "agenda_ultimo_backup_v1";
 
-
-const PERFIL_KEY = "agenda_perfil_professor_v1";
-
-function getPerfil() {
-  try {
-    return JSON.parse(localStorage.getItem(PERFIL_KEY) || "{}");
-  } catch (e) {
-    return {};
-  }
-}
-
-function carregarPerfil() {
-  const p = getPerfil();
-  if ($("perfilProfessor")) $("perfilProfessor").value = p.professor || "";
-  if ($("perfilEscola")) $("perfilEscola").value = p.escola || "";
-  if ($("perfilAno")) $("perfilAno").value = p.ano || "";
-  if ($("perfilCidade")) $("perfilCidade").value = p.cidade || "";
-}
-
-function salvarPerfil() {
-  const perfil = {
-    professor: $("perfilProfessor") ? $("perfilProfessor").value.trim() : "",
-    escola: $("perfilEscola") ? $("perfilEscola").value.trim() : "",
-    ano: $("perfilAno") ? $("perfilAno").value.trim() : "",
-    cidade: $("perfilCidade") ? $("perfilCidade").value.trim() : ""
-  };
-  localStorage.setItem(PERFIL_KEY, JSON.stringify(perfil));
-  alert("Perfil salvo com sucesso.");
-}
-
 const SYNC_URL_KEY = "agenda_sync_url_v1";
 const DEVICE_ID_KEY = "agenda_device_id_v1";
-const AUTO_PULL_ASKED_KEY = "agenda_auto_pull_asked_v1";
-const SYNC_SILENT_KEY = "agenda_sync_silent_v1";
 
 function getDeviceId() {
   let id = localStorage.getItem(DEVICE_ID_KEY);
@@ -2242,21 +2254,28 @@ async function obterResumoNuvem() {
   }
 }
 
-async function enviarDadosNuvem(silencioso = false) {
+async function enviarDadosNuvem() {
   try {
     const registros = await getAll(STORE_REGISTROS);
     const planejamentos = await getAll(STORE_PLANOS);
     const perfil = (typeof getPerfil === "function") ? getPerfil() : {};
 
     if (registros.length === 0 && planejamentos.length === 0) {
-      alert("Este dispositivo está vazio. O envio foi bloqueado para não apagar a planilha.");
+      alert("Este dispositivo está vazio. Para não apagar os dados da nuvem, o envio foi bloqueado. Use 'Puxar dados' primeiro.");
       atualizarStatusSync("Envio bloqueado: dispositivo vazio.");
-      return false;
+      return;
     }
 
-    if (!confirm(`ATENÇÃO: você vai enviar ${registros.length} registro(s) e ${planejamentos.length} planejamento(s) para a planilha.\\n\\nFaça isso somente se estes dados estiverem corretos neste aparelho.\\n\\nDeseja continuar?`)) {
-      atualizarStatusSync("Envio cancelado.");
-      return false;
+    const resumoNuvem = await obterResumoNuvem();
+
+    if (resumoNuvem && resumoNuvem.registros > registros.length) {
+      const continuar = confirm(
+        `A nuvem possui ${resumoNuvem.registros} registro(s), mas este dispositivo possui ${registros.length}.\\n\\nEnviar agora pode substituir dados da nuvem por uma versão menor.\\n\\nDeseja enviar mesmo assim?`
+      );
+      if (!continuar) {
+        atualizarStatusSync("Envio cancelado para proteger os dados da nuvem.");
+        return;
+      }
     }
 
     atualizarStatusSync(`Enviando ${registros.length} registro(s) e ${planejamentos.length} planejamento(s) para a nuvem...`);
@@ -2269,18 +2288,16 @@ async function enviarDadosNuvem(silencioso = false) {
     });
 
     atualizarStatusSync(`Dados enviados: ${registros.length} registro(s) e ${planejamentos.length} planejamento(s).`);
-    if (typeof atualizarCardNuvemInicio === "function") atualizarCardNuvemInicio();
+    atualizarCardNuvemInicio();
     alert("Dados enviados para a nuvem.");
-    return true;
   } catch (erro) {
     atualizarStatusSync("Erro ao enviar dados.");
     alert("Erro ao enviar dados: " + erro.message);
-    return false;
   }
 }
 async function baixarDadosNuvem(modoAutomatico = false) {
   try {
-    atualizarStatusSync("Puxando dados da nuvem em modo seguro...");
+    atualizarStatusSync("Puxando dados da nuvem...");
 
     const retorno = await jsonpSync("pullAll");
 
@@ -2294,51 +2311,33 @@ async function baixarDadosNuvem(modoAutomatico = false) {
     const perfil = dados.perfil || null;
 
     if (registros.length === 0 && planejamentos.length === 0 && !perfil) {
-      atualizarStatusSync("A nuvem está vazia. Nada foi alterado neste aparelho.");
-      if (!modoAutomatico) alert("A nuvem está vazia. Nada foi alterado neste aparelho.");
+      atualizarStatusSync("A nuvem está vazia.");
+      if (!modoAutomatico) alert("Não há dados na nuvem para puxar.");
       return;
     }
 
     if (!modoAutomatico) {
-      const ok = confirm(
-        `Modo seguro: mesclar ${registros.length} registro(s) e ${planejamentos.length} planejamento(s) da nuvem com este aparelho?\\n\\nNada será apagado do aparelho.`
-      );
-      if (!ok) {
+      if (registros.length === 0 && planejamentos.length > 0) {
+      alert("A nuvem está retornando 0 registros de aula e apenas planejamento. Confira a planilha: talvez os registros tenham sido sobrescritos por um aparelho vazio.");
+    }
+
+    if (!confirm(`Puxar ${registros.length} registro(s) e ${planejamentos.length} planejamento(s) da nuvem? Isso vai substituir os dados deste aparelho.`)) {
         atualizarStatusSync("Operação cancelada.");
         return;
       }
     }
 
-    const locais = await getAll(STORE_REGISTROS);
-    const planosLocais = await getAll(STORE_PLANOS);
-    const idsLocais = new Set(locais.map(r => String(r.id)));
-    const idsPlanosLocais = new Set(planosLocais.map(p => String(p.id)));
-
-    let novosRegistros = 0;
-    let novosPlanos = 0;
-    let atualizadosRegistros = 0;
-    let atualizadosPlanos = 0;
+    await clearStore(STORE_REGISTROS);
+    await clearStore(STORE_PLANOS);
 
     for (const r of registros) {
       if (!r.id) r.id = Date.now().toString() + Math.random().toString(16).slice(2);
       if (!r.status) r.status = "Pendente";
-
-      if (idsLocais.has(String(r.id))) {
-        atualizadosRegistros++;
-      } else {
-        novosRegistros++;
-      }
       await put(STORE_REGISTROS, r);
     }
 
     for (const p of planejamentos) {
       if (!p.id) p.id = Date.now().toString() + Math.random().toString(16).slice(2);
-
-      if (idsPlanosLocais.has(String(p.id))) {
-        atualizadosPlanos++;
-      } else {
-        novosPlanos++;
-      }
       await put(STORE_PLANOS, p);
     }
 
@@ -2350,29 +2349,48 @@ async function baixarDadosNuvem(modoAutomatico = false) {
     ultimoRelatorio = [];
     renderizarResultados();
     await atualizarDashboard();
-    if (typeof atualizarCardNuvemInicio === "function") atualizarCardNuvemInicio();
-
-    const msg = `Recuperação concluída. Novos registros: ${novosRegistros}. Atualizados: ${atualizadosRegistros}. Novos planejamentos: ${novosPlanos}.`;
-    atualizarStatusSync(msg);
+    atualizarStatusSync(`Dados puxados com sucesso: ${registros.length} registro(s).`);
+    atualizarCardNuvemInicio();
 
     if (!modoAutomatico) {
-      alert(msg);
+      alert("Dados puxados da nuvem com sucesso.");
     }
   } catch (erro) {
     atualizarStatusSync("Erro ao puxar dados.");
     if (!modoAutomatico) {
-      alert("Erro ao puxar dados: " + erro.message + "\\n\\nConfira a URL do Web App e a planilha.");
+      alert("Erro ao puxar dados: " + erro.message + "\n\nConfira se a URL do Web App foi colada em Config. > Sincronização.");
     } else {
       console.warn("Puxar automático falhou:", erro);
     }
   }
 }
 async function sincronizarTudo() {
-  await baixarDadosNuvem(false);
+  const registrosLocais = await getAll(STORE_REGISTROS);
+  const planosLocais = await getAll(STORE_PLANOS);
+
+  if (registrosLocais.length === 0 && planosLocais.length === 0) {
+    await baixarDadosNuvem(false);
+  } else {
+    await enviarDadosNuvem();
+  }
 }
+
 async function sincronizarAoSalvar() {
   if (!getSyncURL()) return;
-  atualizarStatusSync("Alteração salva neste aparelho. Envio automático pausado no modo recuperação.");
+
+  try {
+    const registros = await getAll(STORE_REGISTROS);
+    const planejamentos = await getAll(STORE_PLANOS);
+
+    if (registros.length === 0 && planejamentos.length === 0) {
+      console.warn("Sincronização automática bloqueada: dispositivo vazio.");
+      return;
+    }
+
+    await enviarDadosNuvem();
+  } catch (e) {
+    console.warn("Sincronização automática falhou:", e);
+  }
 }
 async function sincronizarAoAbrir() {
   if (!getSyncURL()) return;
@@ -2380,16 +2398,169 @@ async function sincronizarAoAbrir() {
   try {
     const retorno = await jsonpSync("status");
     if (retorno && retorno.ok) {
-      atualizarStatusSync("Conectado à nuvem. Modo recuperação ativo.");
+      atualizarStatusSync("Conectado à nuvem.");
+    }
+
+    const registrosLocais = await getAll(STORE_REGISTROS);
+    const planosLocais = await getAll(STORE_PLANOS);
+
+    if (registrosLocais.length === 0 && planosLocais.length === 0) {
+      atualizarStatusSync("Aparelho vazio. Puxando dados da nuvem...");
+      await baixarDadosNuvem(true);
     }
   } catch (e) {
     console.warn("Status de sincronização indisponível:", e);
   }
 }
 
-function ativarPerguntaAoAbrir() {
-  sessionStorage.removeItem(AUTO_PULL_ASKED_KEY);
-  alert("Pronto. Na próxima abertura do app, ele perguntará se deseja puxar os dados da nuvem.");
+
+function getPerfil() {
+  try {
+    return JSON.parse(localStorage.getItem(PERFIL_KEY) || "{}");
+  } catch (e) {
+    return {};
+  }
+}
+
+function carregarPerfil() {
+  const p = getPerfil();
+  if ($("perfilProfessor")) $("perfilProfessor").value = p.professor || "";
+  if ($("perfilEscola")) $("perfilEscola").value = p.escola || "";
+  if ($("perfilAno")) $("perfilAno").value = p.ano || "";
+  if ($("perfilCidade")) $("perfilCidade").value = p.cidade || "";
+}
+
+function salvarPerfil() {
+  const perfil = {
+    professor: $("perfilProfessor").value.trim(),
+    escola: $("perfilEscola").value.trim(),
+    ano: $("perfilAno").value.trim(),
+    cidade: $("perfilCidade").value.trim()
+  };
+  localStorage.setItem(PERFIL_KEY, JSON.stringify(perfil));
+  sincronizarAoSalvar();
+  alert("Perfil salvo com sucesso.");
+}
+
+async function configurarPerguntaSeguranca() {
+  const pergunta = prompt("Digite uma pergunta de segurança. Ex.: Nome da escola?");
+  if (!pergunta) return;
+
+  const resposta = prompt("Digite a resposta secreta:");
+  if (!resposta) return;
+
+  const hash = await gerarHashLogin(resposta.trim().toLowerCase());
+  localStorage.setItem(SECURITY_QUESTION_KEY, pergunta.trim());
+  localStorage.setItem(SECURITY_ANSWER_HASH_KEY, hash);
+  alert("Pergunta de segurança configurada.");
+}
+
+async function esqueciSenha() {
+  if (!loginConfigurado()) {
+    alert("Ainda não existe login cadastrado.");
+    return;
+  }
+
+  const pergunta = localStorage.getItem(SECURITY_QUESTION_KEY);
+  const respostaHash = localStorage.getItem(SECURITY_ANSWER_HASH_KEY);
+
+  if (!pergunta || !respostaHash) {
+    alert("Nenhuma pergunta de segurança foi configurada. Entre no app e configure em Configurações.");
+    return;
+  }
+
+  const resposta = prompt(pergunta);
+  if (!resposta) return;
+
+  const hash = await gerarHashLogin(resposta.trim().toLowerCase());
+
+  if (hash !== respostaHash) {
+    alert("Resposta incorreta.");
+    return;
+  }
+
+  const novoUsuario = prompt("Digite o novo usuário:");
+  if (!novoUsuario) return;
+
+  const novaSenha = prompt("Digite a nova senha:");
+  if (!novaSenha) return;
+
+  const novoHash = await gerarHashLogin(novoUsuario.trim() + "::" + novaSenha);
+  localStorage.setItem(LOGIN_USER_KEY, novoUsuario.trim());
+  localStorage.setItem(LOGIN_HASH_KEY, novoHash);
+  alert("Login redefinido com sucesso.");
+}
+
+async function usarPlanoNoRegistro(id) {
+  const p = await getOne(STORE_PLANOS, id);
+  if (!p) return;
+
+  $("editId").value = "";
+  $("data").value = hojeISO();
+  $("aulaNumero").value = p.aulaNumero || "";
+  $("turma").value = p.turma || "";
+  atualizarDisciplinasDaTurma(p.disciplina || "");
+  await carregarPlanosParaRegistro();
+  $("planoRegistro").value = p.id;
+  $("aula").value = p.assunto || "";
+  $("conteudo").value = p.conteudo || "";
+  $("atividade").value = p.atividade || "";
+  $("pendencias").value = p.pendencias || "";
+
+  abrirTela("telaRegistro");
+}
+
+async function duplicarPlano(id) {
+  const p = await getOne(STORE_PLANOS, id);
+  if (!p) return;
+
+  const novo = {
+    ...p,
+    id: Date.now().toString(),
+    usado: false,
+    assunto: (p.assunto || "") + " (cópia)"
+  };
+
+  await put(STORE_PLANOS, novo);
+  alert("Planejamento duplicado.");
+  buscarPlanos();
+}
+
+async function alternarPlanoUsado(id) {
+  const p = await getOne(STORE_PLANOS, id);
+  if (!p) return;
+
+  p.usado = !p.usado;
+  await put(STORE_PLANOS, p);
+  buscarPlanos();
+}
+
+async function gerarHistoricoMensal() {
+  const mes = $("histMes").value;
+  if (!mes) {
+    alert("Selecione um mês.");
+    return;
+  }
+
+  const regs = (await getAll(STORE_REGISTROS)).filter(r => (r.data || "").startsWith(mes));
+  const total = regs.length;
+  const ministradas = regs.filter(r => r.status === "Ministrada").length;
+  const pendentes = regs.filter(r => r.status !== "Ministrada").length;
+
+  const porDisciplina = {};
+  regs.forEach(r => {
+    const chave = r.disciplina || "Sem disciplina";
+    porDisciplina[chave] = (porDisciplina[chave] || 0) + 1;
+  });
+
+  $("histResumo").innerHTML = `<strong>${total}</strong> registro(s) no mês. Ministradas: <strong>${ministradas}</strong>. Pendentes: <strong>${pendentes}</strong>.`;
+
+  const itens = Object.entries(porDisciplina)
+    .sort((a,b)=>b[1]-a[1])
+    .map(([disciplina, qtd]) => `<div class="history-item"><strong>${esc(disciplina)}</strong>${qtd} aula(s) registrada(s)</div>`)
+    .join("");
+
+  $("histConteudo").innerHTML = itens || '<div class="empty">Nenhum registro neste mês.</div>';
 }
 
 function verificarLembreteBackup() {
@@ -2835,10 +3006,10 @@ async function gerarRelatorio(){
   $("relConteudo").innerHTML = regs.length ? `
     <div class="report-header">
       <h3>Relatório de Aulas</h3>
-      <p><strong>Escola:</strong> ${esc(getPerfil().escola || "Não informado")}<br>
-      <strong>Professor:</strong> ${esc(getPerfil().professor || "Não informado")}<br>
-      <strong>Ano letivo:</strong> ${esc(getPerfil().ano || "Não informado")}<br>
-      <strong>Cidade:</strong> ${esc(getPerfil().cidade || "Não informado")}<br>
+      <p><strong>Escola:</strong> ${esc(((typeof getPerfil === "function") ? getPerfil() : {}).escola || "Não informado")}<br>
+      <strong>Professor:</strong> ${esc(((typeof getPerfil === "function") ? getPerfil() : {}).professor || "Não informado")}<br>
+      <strong>Ano letivo:</strong> ${esc(((typeof getPerfil === "function") ? getPerfil() : {}).ano || "Não informado")}<br>
+      <strong>Cidade:</strong> ${esc(((typeof getPerfil === "function") ? getPerfil() : {}).cidade || "Não informado")}<br>
       <strong>Turma:</strong> ${esc(turma || "Todas")}<br>
       <strong>Disciplina:</strong> ${esc(disciplina || "Todas")}<br>
       <strong>Período:</strong> ${de ? formatarData(de) : "início"} até ${ate ? formatarData(ate) : "fim"}</p>
@@ -2855,7 +3026,7 @@ async function gerarRelatorio(){
     <p><strong>Conteúdo:</strong> ${esc(r.conteudo)||"-"}</p>
     <p><strong>Atividade:</strong> ${esc(r.atividade)||"-"}</p>
     <p><strong>Pendências:</strong> ${esc(r.pendencias)||"-"}</p>
-  </article>`).join("") + `<div class="report-signature"><p>________________________________________</p><p>${esc(getPerfil().professor || "Professor")}</p></div>` : '<div class="empty">Nenhum registro para o relatório.</div>';
+  </article>`).join("") + `<div class="report-signature"><p>________________________________________</p><p>${esc(((typeof getPerfil === "function") ? getPerfil() : {}).professor || "Professor")}</p></div>` : '<div class="empty">Nenhum registro para o relatório.</div>';
 }
 
 function exportarRelatorioPDF(){
